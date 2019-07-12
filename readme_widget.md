@@ -1,17 +1,23 @@
-Project name and description
+# Project name and description #
+Name of project is Xsolla Login Widget SDK.
 This SDK allows you to quickly integrate Xsolla Login Widget with your website.
 Currently SDK supports following types of authorization:
-●	via login/password
-●	via social networks
+*	via login/password;
+*	via social networks/
 More methods on its way.
-The library is used on Windows 7, 8 and macOS.
-Getting started
-Connect Xsolla Login Javascript SDK:
-●	If your project uses Bower, launch the console and run the following command:
-bower install xsolla-login-js-sdk
 
-●	If you don’t have the package installed, add the following code to the <head> tag of the web page where you want to place the widget:
-<script src="https://cdn.xsolla.net/xsolla-login-widget/sdk/2.1.1/xl.min.js"></script>
+# Getting started
+## Requirements
+To use the library, you must have Windows 7, 8 or macOS. 
+Also you need to install Bower - a JavaScript package manager for the web. 
+## Installation
+
+Connect Xsolla Login Javascript SDK:
+> If your project uses Bower, launch the console and run the following command:
+*bower install xsolla-login-js-sdk*
+
+> If you don’t have the package installed, add the following code to the <head> tag of the web page where you want to place the widget:
+*<script src="https://cdn.xsolla.net/xsolla-login-widget/sdk/2.1.1/xl.min.js"></script>*
 
 Step 2
 Add the widget initialization code to the <body> tag.
