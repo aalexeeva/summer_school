@@ -7,26 +7,29 @@ Currently SDK supports following types of authorization:
 More methods on its way.
 
 # Getting started
+
 ## Requirements
 To use the library, you must have Windows 7, 8 or macOS. 
 Also you need to install Bower - a JavaScript package manager for the web. 
+
 ## Installation
 
 Connect Xsolla Login Javascript SDK:
 > If your project uses Bower, launch the console and run the following command:
-*bower install xsolla-login-js-sdk*
+<code>bower install xsolla-login-js-sdk</code>
 
 > If you don’t have the package installed, add the following code to the <head> tag of the web page where you want to place the widget:
-*<script src="https://cdn.xsolla.net/xsolla-login-widget/sdk/2.1.1/xl.min.js"></script>*
+<code><script src="https://cdn.xsolla.net/xsolla-login-widget/sdk/2.1.1/xl.min.js"></script></code>
 
-Step 2
+# Usage
 Add the widget initialization code to the <body> tag.
-<script type="text/javascript">
-XL.init({
-  projectId: '{Login ID}',
-  callbackUrl: '{callbackUrl}'
-});
-</script>
+<pre><code>    <script type="text/javascript">
+    XL.init({
+       projectId: '{Login ID}',
+       callbackUrl: '{callbackUrl}'
+    });
+    </script></code></pre>
+ 
 Parameter	Description
 projectId	Login ID from Publisher Account. Required.
 callbackUrl	URL to redirect the user to after authentication. Must be identical to Callback URLspecified in Publisher Account in Login settings. Required if there are several Callback URLs.
