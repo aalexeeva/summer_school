@@ -3,14 +3,14 @@ Name of project is Xsolla Login Widget SDK.
 This SDK allows you to quickly integrate Xsolla Login Widget with your website.
 Currently SDK supports following types of authorization:
 *	via login/password;
-*	via social networks/
+*	via social networks.
 More methods on its way.
 
 # Getting started
 
 ## Requirements
 To use the library, you must have Windows 7, 8 or macOS. 
-Also you need to install Bower - a JavaScript package manager for the web. 
+Also if you need to use Bower, you should to install it.  
 
 ## Installation
 
