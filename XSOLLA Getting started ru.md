@@ -431,7 +431,7 @@ custom_parameters|object|Ваши дополнительные параметр�
 
 Если какой-либо параметр был передан в некорректном формате, токен не может быть выдан. Будет возвращен 422 HTTP код, в JSON объекте в теле ответа будет содержаться информация об ошибке. В параметре "extended_message" указывается, какие именно параметры были переданы неверно.
 
-Пример:
+Пример JSON объекта с ошибкой:
 ```
 {
     "extended_message": {
@@ -444,3 +444,311 @@ custom_parameters|object|Ваши дополнительные параметр�
     }
 }
 ```
+Примеры запросов и ответов:
+
+***HTTP***
+```HTTP
+ЗАПРОС
+POST https://api.xsolla.com/merchant/v2/merchants/{merchant_id}/token
+
+Headers:
+  Authorization: Basic <your_authorization_basic_key>
+Content-Type: application/json
+
+Body:
+  {
+  "purchase": {
+    "virtual_currency": {
+      "quantity": 100
+    },
+    "virtual_items": {
+      "items": [
+        {
+          "amount": 1,
+          "sku": "SKU01"
+        }
+      ]
+    }
+  },
+  "settings": {
+    "currency": "USD",
+    "language": "en",
+    "project_id": 16184,
+    "ui": {
+      "components": {
+        "virtual_currency": {
+          "custom_amount": true
+        }
+      },
+      "desktop": {
+        "virtual_item_list": {
+          "button_with_price": true,
+          "layout": "list"
+        }
+      },
+      "size": "medium"
+    }
+  },
+  "user": {
+    "country": {
+      "allow_modify": true,
+      "value": "US"
+    },
+    "email": {
+      "value": "john.smith@mail.com"
+    },
+    "id": {
+      "value": "user_2"
+    },
+    "name": {
+      "value": "John Smith"
+    }
+  }
+}
+ОТВЕТ
+{
+  "token": "eop57k1boA7nnYPtewZ6KEXJyJADEwRT"
+}
+```
+
+***CURL***
+```CURL
+ЗАПРОС
+curl --request POST \
+  --url https://api.xsolla.com/merchant/v2/merchants/{merchant_id}/token \
+  --header 'authorization: Basic <your_authorization_basic_key>' \
+  --header 'content-type: application/json' \
+  --data '{"user":{"id":{"value":"user_2"},"name":{"value":"John Smith"},"email":{"value":"john.smith@mail.com"},"country":{"value":"US","allow_modify":true}},"settings":{"project_id":16184,"currency":"USD","language":"en","ui":{"size":"medium","desktop":{"virtual_item_list":{"layout":"list","button_with_price":true}},"components":{"virtual_currency":{"custom_amount":true}}}},"purchase":{"virtual_currency":{"quantity":100},"virtual_items":{"items":[{"sku":"SKU01","amount":1}]}}}'
+ОТВЕТ
+{
+  "token": "eop57k1boA7nnYPtewZ6KEXJyJADEwRT"
+}
+```
+
+***PHP***
+```PHP
+<?php
+
+$client = new http\Client;
+$request = new http\Client\Request;
+
+$body = new http\Message\Body;
+$body->append('{"user":{"id":{"value":"user_2"},"name":{"value":"John Smith"},"email":{"value":"john.smith@mail.com"},"country":{"value":"US","allow_modify":true}},"settings":{"project_id":16184,"currency":"USD","language":"en","ui":{"size":"medium","desktop":{"virtual_item_list":{"layout":"list","button_with_price":true}},"components":{"virtual_currency":{"custom_amount":true}}}},"purchase":{"virtual_currency":{"quantity":100},"virtual_items":{"items":[{"sku":"SKU01","amount":1}]}}}');
+
+$request->setRequestUrl('https://api.xsolla.com/merchant/v2/merchants/{merchant_id}/token');
+$request->setRequestMethod('POST');
+$request->setBody($body);
+
+$request->setHeaders(array(
+  'authorization' => 'Basic <your_authorization_basic_key>',
+  'content-type' => 'application/json'
+));
+
+$client->enqueue($request)->send();
+$response = $client->getResponse();
+
+echo $response->getBody();
+ОТВЕТ
+{
+  "token": "eop57k1boA7nnYPtewZ6KEXJyJADEwRT"
+}
+```
+
+***C#***
+```C#
+ЗАПРОС
+var client = new RestClient("https://api.xsolla.com/merchant/v2/merchants/{merchant_id}/token");
+var request = new RestRequest(Method.POST);
+request.AddHeader("authorization", "Basic <your_authorization_basic_key>");
+request.AddHeader("content-type", "application/json");
+request.AddParameter("application/json", "{\"user\":{\"id\":{\"value\":\"user_2\"},\"name\":{\"value\":\"John Smith\"},\"email\":{\"value\":\"john.smith@mail.com\"},\"country\":{\"value\":\"US\",\"allow_modify\":true}},\"settings\":{\"project_id\":16184,\"currency\":\"USD\",\"language\":\"en\",\"ui\":{\"size\":\"medium\",\"desktop\":{\"virtual_item_list\":{\"layout\":\"list\",\"button_with_price\":true}},\"components\":{\"virtual_currency\":{\"custom_amount\":true}}}},\"purchase\":{\"virtual_currency\":{\"quantity\":100},\"virtual_items\":{\"items\":[{\"sku\":\"SKU01\",\"amount\":1}]}}}", ParameterType.RequestBody);
+IRestResponse response = client.Execute(request);
+ОТВЕТ
+{
+  "token": "eop57k1boA7nnYPtewZ6KEXJyJADEwRT"
+}
+```
+
+***PYTHON***
+```PYTHON
+ЗАПРОС
+import http.client
+
+conn = http.client.HTTPSConnection("api.xsolla.com")
+
+payload = "{\"user\":{\"id\":{\"value\":\"user_2\"},\"name\":{\"value\":\"John Smith\"},\"email\":{\"value\":\"john.smith@mail.com\"},\"country\":{\"value\":\"US\",\"allow_modify\":true}},\"settings\":{\"project_id\":16184,\"currency\":\"USD\",\"language\":\"en\",\"ui\":{\"size\":\"medium\",\"desktop\":{\"virtual_item_list\":{\"layout\":\"list\",\"button_with_price\":true}},\"components\":{\"virtual_currency\":{\"custom_amount\":true}}}},\"purchase\":{\"virtual_currency\":{\"quantity\":100},\"virtual_items\":{\"items\":[{\"sku\":\"SKU01\",\"amount\":1}]}}}"
+
+headers = {
+    'content-type': "application/json",
+    'authorization': "Basic <your_authorization_basic_key>"
+    }
+
+conn.request("POST", "/merchant/v2/merchants/{merchant_id}/token", payload, headers)
+
+res = conn.getresponse()
+data = res.read()
+
+print(data.decode("utf-8"))
+ОТВЕТ
+{
+  "token": "eop57k1boA7nnYPtewZ6KEXJyJADEwRT"
+}
+```
+
+***RUBY***
+```RUBY
+ЗАПРОС
+require 'uri'
+require 'net/http'
+
+url = URI("https://api.xsolla.com/merchant/v2/merchants/{merchant_id}/token")
+
+http = Net::HTTP.new(url.host, url.port)
+http.use_ssl = true
+http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+request = Net::HTTP::Post.new(url)
+request["content-type"] = 'application/json'
+request["authorization"] = 'Basic <your_authorization_basic_key>'
+request.body = "{\"user\":{\"id\":{\"value\":\"user_2\"},\"name\":{\"value\":\"John Smith\"},\"email\":{\"value\":\"john.smith@mail.com\"},\"country\":{\"value\":\"US\",\"allow_modify\":true}},\"settings\":{\"project_id\":16184,\"currency\":\"USD\",\"language\":\"en\",\"ui\":{\"size\":\"medium\",\"desktop\":{\"virtual_item_list\":{\"layout\":\"list\",\"button_with_price\":true}},\"components\":{\"virtual_currency\":{\"custom_amount\":true}}}},\"purchase\":{\"virtual_currency\":{\"quantity\":100},\"virtual_items\":{\"items\":[{\"sku\":\"SKU01\",\"amount\":1}]}}}"
+
+response = http.request(request)
+puts response.read_body
+ОТВЕТ
+{
+  "token": "eop57k1boA7nnYPtewZ6KEXJyJADEwRT"
+}
+```
+
+***JAVA***
+```JAVA
+ЗАПРОС
+OkHttpClient client = new OkHttpClient();
+
+MediaType mediaType = MediaType.parse("application/json");
+RequestBody body = RequestBody.create(mediaType, "{\"user\":{\"id\":{\"value\":\"user_2\"},\"name\":{\"value\":\"John Smith\"},\"email\":{\"value\":\"john.smith@mail.com\"},\"country\":{\"value\":\"US\",\"allow_modify\":true}},\"settings\":{\"project_id\":16184,\"currency\":\"USD\",\"language\":\"en\",\"ui\":{\"size\":\"medium\",\"desktop\":{\"virtual_item_list\":{\"layout\":\"list\",\"button_with_price\":true}},\"components\":{\"virtual_currency\":{\"custom_amount\":true}}}},\"purchase\":{\"virtual_currency\":{\"quantity\":100},\"virtual_items\":{\"items\":[{\"sku\":\"SKU01\",\"amount\":1}]}}}");
+Request request = new Request.Builder()
+  .url("https://api.xsolla.com/merchant/v2/merchants/{merchant_id}/token")
+  .post(body)
+  .addHeader("content-type", "application/json")
+  .addHeader("authorization", "Basic <your_authorization_basic_key>")
+  .build();
+
+Response response = client.newCall(request).execute();
+ОТВЕТ
+{
+  "token": "eop57k1boA7nnYPtewZ6KEXJyJADEwRT"
+}
+```
+
+***JS***
+```JS
+ЗАПРОС
+var data = JSON.stringify({
+  "user": {
+    "id": {
+      "value": "user_2"
+    },
+    "name": {
+      "value": "John Smith"
+    },
+    "email": {
+      "value": "john.smith@mail.com"
+    },
+    "country": {
+      "value": "US",
+      "allow_modify": true
+    }
+  },
+  "settings": {
+    "project_id": 16184,
+    "currency": "USD",
+    "language": "en",
+    "ui": {
+      "size": "medium",
+      "desktop": {
+        "virtual_item_list": {
+          "layout": "list",
+          "button_with_price": true
+        }
+      },
+      "components": {
+        "virtual_currency": {
+          "custom_amount": true
+        }
+      }
+    }
+  },
+  "purchase": {
+    "virtual_currency": {
+      "quantity": 100
+    },
+    "virtual_items": {
+      "items": [
+        {
+          "sku": "SKU01",
+          "amount": 1
+        }
+      ]
+    }
+  }
+});
+
+var xhr = new XMLHttpRequest();
+xhr.withCredentials = true;
+
+xhr.addEventListener("readystatechange", function () {
+  if (this.readyState === this.DONE) {
+    console.log(this.responseText);
+  }
+});
+
+xhr.open("POST", "https://api.xsolla.com/merchant/v2/merchants/{merchant_id}/token");
+xhr.setRequestHeader("content-type", "application/json");
+xhr.setRequestHeader("authorization", "Basic <your_authorization_basic_key>");
+
+xhr.send(data);
+ОТВЕТ
+{
+  "token": "eop57k1boA7nnYPtewZ6KEXJyJADEwRT"
+}
+```
+
+### Список дополнительных параметров
+
+Вы можете передавать в токене в объекте custom_parameters дополнительные параметры, которые могут использоваться для настройки антифрод-фильтров. Рекомендуемые параметры приведены в таблице ниже, при необходимости данный список можно расширить. ([подробнее](https://developers.xsolla.com/ru/recipes/general/antifraud/)).
+
+Поле | Тип | Описание
+---- | --- | --------
+registration_date|string|Дата регистрации аккаунта согласно стандарту [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601).
+total_hours|integer|Общее количество часов, проведенных в игре.
+total_characters|integer|Количество персонажей игрока.
+social_networks_added|boolean|Подключил ли игрок профили в социальных сетях.
+profile_image_added|boolean|Загрузил ли игрок изображение профиля.
+active_date|string|Дата последнего посещения согласно стандарту [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601).
+total_friends|integer|Количество друзей игрока.
+additional_verification|boolean|Использует ли игрок дополнительные способы защиты аккаунта.
+win_rate|integer|Рейтинг побед игрока.
+last_change_password_date|string|Дата последней смены пароля согласно стандарту [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601).
+chat_activity|boolean|Пишет ли игрок в чате.
+forum_activity|boolean|Пишет ли игрок в форуме.
+total_bans|integer|Количество банов игрока в чате/на форуме.
+profile_completed|boolean|Добавил ли игрок дополнительную информацию в профиль.
+notifications_enabled|boolean|Подписался ли игрок на рассылку уведомлений.
+user_level|integer|Уровень игрока, репутация или ранг.
+karma_points|integer|Карма игрока.
+total_sum|float|Общая сумма платежей.
+non_premium_currency|float|Сумма непремиальной валюты игрока.
+total_game_events|integer|Количество внутриигровых событий, в которых участвовал игрок.
+total_gifts|integer|Количество подарков, отправленных или полученных игроком.
+tutorial_completed|boolean|Завершил ли игрок обучение в игре.
+completed_tasks|integer|Количество выполненных заданий.
+items_used|boolean|Использует ли игрок купленные в игре предметы.
+pvp_activity|boolean|Участвует ли игрок в PvP.
+total_clans|integer|Количество кланов, в которых состоит игрок.
+unlocked_achievements|integer|Количество разблокированных умений.
+total_inventory_value|float|Суммарная стоимость инвентаря во внутриигровой валюте.
+character_customized|boolean|Настраивал ли игрок персонажа.
+session_time|string|Период времени, который пользователь проводит в игре, согласно стандарту [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601).
+
+## Оповещения
