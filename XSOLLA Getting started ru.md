@@ -756,3 +756,1806 @@ character_customized|boolean|Показатель настройки персо�
 session_time|string|Период времени, который пользователь проводит в игре, согласно стандарту [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601).
 
 ## Оповещения
+### Введение
+Для оповещения о событиях, которые происходят с транзакцией в XSOLLA, используется **webhook**. Оповещения можно использовать для автоматизации бэк-офиса и функций, таких как отображение статуса.
+
+Webhook — это сервис для оповещения о событиях, таких как:
+* Совершение платежей, включая покупку виртуальной валюты, покупку предметов и проч.
+* Рекуррентные платежи и действия с подписками.
+* Chargeback/refund по транзакции.
+
+В большинстве случаев действие, которое вызывает webhook, является следствием действия пользователя на странице оплаты. Тем не менее и другие действия могут вызывать webhook.
+
+Например, можно отменить платеж через XSOLLA API или платежная система оповестит разработчиков об оспариваемой операции.
+
+Примеры действий в результате обработки webhook:
+* Пополнение баланса пользователя.
+* Предоставление новых предметов пользователю.
+* Начало предоставления подписки.
+* Блокировка пользователя в случае подозрения в мошенничестве.
+
+Оповещения должны приниматься со следующих IP адресов: `185.30.20.0/24`, `185.30.21.0/24`.
+
+В базе данных не должно быть двух успешных транзакций с одинаковым ID. Если система отправила webhook с ID, который уже есть в  базе, то необходимо вернуть результат предыдущей обработки данной транзакции.  Покупка не должна быть засчитана пользователю еще раз, а в базе данных не должно быть дублирующих записей.
+
+XSOLLA не гарантирует, что скрипт обработки получит все оповещения. Поскольку Интернет не является на 100% надежным, webhook может быть потерян или задержан. Для решения этих проблем сервис оповещений включает в себя механизм повторных оповещений, который отправляет оповещение, пока скрипт не подтвердит получение оповещения. Webhook может быть повторно отправлен в течение 12 часов с момента первой попытки. Максимальное количество попыток — 12.
+
+> ***Примечание!*** 
+> ~~~
+> Хотя Интернет является частой причиной проблем с webhook, наиболее вероятной причиной чаще всего является проблема в логике скрипта обработки.
+> ~~~
+
+### Подпись запроса и ответ
+Подпись обеспечивает безопасность передачи данных. 
+Генерация подписи состоит из двух шагов:
+1. Конкатенация JSON из тела запроса и секретного ключа проекта. 
+1. Применение SHA-1 криптографической хэш-функции к получившейся на первом шаге строке.
+
+Необходимо проверить, что сформированная подпись совпадает с подписью, отправленной в HTTP заголовке.
+
+Примеры подписей запросов:
+
+***HTTP***
+```HTTP
+ЗАПРОС
+POST /your_uri HTTP/1.1
+Host: your.host
+Accept: application/json
+Content-Type: application/json
+Content-Length: 165
+Authorization: Signature 52eac2713985e212351610d008e7e14fae46f902
+
+{"notification_type":"user_validation","user":{"ip":"127.0.0.1","phone":"18777976552","email":"email@example.com","id":1234567,"name":"Xsolla User","country":"US"}}
+```
+
+***CURL***
+```CURL
+ЗАПРОС
+$curl -v 'https://your.hostname/your/uri' \
+-X POST \
+-H 'Authorization: Signature 52eac2713985e212351610d008e7e14fae46f902' \
+-d '{"notification_type":"user_validation","user":{"ip":"127.0.0.1","phone":"18777976552","email":"email@example.com","id":1234567,"name":"Xsolla User","country":"US"}}'
+```
+
+XSOLLA использует HTTP коды ответа для обозначения успешного или ошибочного запроса. Код 204 обозначает успешную обработку оповещения. В случае возникновения ошибки необходимо вернуть 400 код (например, отсутствует обязательный параметр, или пополнение баланса невозможно). Код 500 обозначает временную серверную ошибку.
+
+### Типы оповещения
+Тип оповещения передается в параметре 'notification_type'.
+
+Поле | Описание
+---- | --------
+user_validation|Проверка существования пользователя в игре.
+user_search|Получение информации о пользователе по параметру Public user ID.
+payment|Оповещение об успешном платеже.
+refund|Оповещение об отмене платежа.
+afs_reject|Оповещение об отмене транзакциии AFS системой.
+create_subscription|Оповещение о создании подписки.
+update_subscription|Оповещение о продлении подписки или о смене каких-либо параметров внутри подписки.
+cancel_subscription|Оповещение об отмене подписки.
+get_pincode|Запрос на получение ключа.
+user_balance_operation|Оповещение об изменении баланса пользователя (тип операции отправляется в оповещении operation_type).
+redeem_key|Оповещение об активации ключа.
+upgrade_refund|Оповещение об отмене апгрейда.
+inventory_get|Отправка списка предметов из инвентаря игры на вторичный рынок.
+inventory_pull|Отправка предметов из инвентаря игры на вторичный рынок.
+inventory_push	Получение предметов в инвентарь игры со вторичного рынка.
+
+### Проверка существования пользователя
+Сервер Иксоллы отправляет запрос на webhook URL, чтобы удостовериться, что данный пользователь существует в игре. 
+
+Поле | Тип | Описание
+---- | --- | --------
+user|object|Объект с информацией о пользователе.
+user.ip|string|IP адрес пользователя.
+user.phone|string|Номер телефона пользователя (в международном формате).
+user.email|string|Email пользователя.
+user.id|string|ID пользователя. Обязательный.
+user.name|string|Имя пользователя.
+user.country|string|Двухбуквенное обозначение страны согласно стандарту ISO 3166-1 alpha-2.
+
+Примеры проверки:
+
+***HTTP***
+```HTTP
+ЗАПРОС
+POST /your/uri HTTP/1.1
+Host: your.hostname
+Accept: application/json
+Content-Type: application/json
+Content-Length: 240
+Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
+
+{
+    "notification_type":"user_validation",
+    "user": {
+        "ip": "127.0.0.1",
+        "phone": "18777976552",
+        "email": "email@example.com",
+        "id": "1234567",
+        "name": "Xsolla User",
+        "country": "US"
+    }
+}
+ОТВЕТ
+HTTP/1.1 204 No Content
+```
+
+***CURL***
+```CURL
+ЗАПРОС
+$ curl -v 'https://your.hostname/your/uri' \
+-X POST \
+-H 'Accept: application/json' \
+-H 'Content-Type: application/json' \
+-H 'Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f' \
+-d '{
+    "notification_type":"user_validation",
+    "user": {
+        "ip": "127.0.0.1",
+        "phone": "18777976552",
+        "email": "email@example.com",
+        "id": "1234567",
+        "name": "Xsolla User",
+        "country": "US"
+    }
+}'
+ОТВЕТ
+```
+
+***PHP***
+```PHP
+ЗАПРОС
+<?php
+
+$request = array(
+    'notification_type' => 'user_validation',
+    'user' => array(
+        'ip' => '127.0.0.1',
+        'phone' => '18777976552',
+        'email'=> 'email@example.com',
+        'id'=> '1234567',
+        'country' => 'US'
+    )
+);
+ОТВЕТ
+<?php
+
+use Xsolla\SDK\Webhook\WebhookServer;
+use Xsolla\SDK\Webhook\Message\Message;
+use Xsolla\SDK\Exception\Webhook\XsollaWebhookException;
+
+$callback = function (Message $message) {
+    if ($message->isUserValidation()) {
+       $userArray = $message->getUser();
+       $userId = $message->getUserId();
+       $messageArray = $message->toArray();
+       //TODO if user not found, you should throw InvalidUserException
+    }
+};
+
+$webhookServer = WebhookServer::create($callback, PROJECT_KEY);
+$webhookServer->start();
+```
+
+### Поиск пользователя
+Public User ID — параметр, по которому можно однозначно идентифицировать пользователя и который хорошо известен пользователю в отличие от User ID (в качестве Public User ID может быть email, никнейм и т.д.). Этот webhook используется, когда есть возможность совершить оплату вне игры (например, при оплате на кнопку игры в терминале).
+
+Поле | Тип | Описание
+---- | --- | --------
+notification_type|string|Тип оповещения. Обязательный.
+user|object|Объект с информацией о пользователе. Обязательный.
+user.public_id|string|Public ID пользователя.
+user.id|string|ID пользователя.
+
+Примеры поиска пользователя: 
+
+***HTTP***
+```HTTP
+ЗАПРОС
+POST /your/uri HTTP/1.1
+Host: your.hostname
+Accept: application/json
+Content-Type: application/json
+Content-Length: 240
+Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
+
+{
+    "notification_type":"user_search",
+    "user": {
+        "public_id": "public_email@example.com"
+    }
+}
+ОТВЕТ
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+    "user": {
+        "public_id": "public_email@example.com",
+        "phone": "18777976552",
+        "email": "email@example.com",
+        "id": "1234567",
+        "name": "Xsolla User"
+    }
+}
+```
+
+***CURL***
+```CURL
+ЗАПРОС
+$ curl -v 'https://your.hostname/your/uri' \
+-X POST \
+-H 'Accept: application/json' \
+-H 'Content-Type: application/json' \
+-H 'Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f' \
+-d '{
+    "notification_type":"user_search",
+    "user": {
+        "public_id": "public_email@example.com"
+    }
+}'
+ОТВЕТ
+{
+    "user": {
+        "public_id": "public_email@example.com",
+        "phone": "18777976552",
+        "email": "email@example.com",
+        "id": "1234567",
+        "name": "Xsolla User"
+    }
+}
+```
+
+***PHP***
+```PHP
+ЗАПРОС
+<?php
+
+$request = array(
+    'notification_type' => 'user_search',
+    'user' => array(
+        'public_id' => 'public_email@example.com'
+    )
+);
+ОТВЕТ
+<?php
+​
+use Xsolla\SDK\Webhook\WebhookServer;
+use Xsolla\SDK\Webhook\Message\Message;
+​
+$callback = function (Message $message) {
+    if ($message instanceof \Xsolla\SDK\Webhook\Message\UserSearchMessage) {
+        $userArray = $message->getUser();
+        $userPublicId = $message->getUserPublicId();
+        // TODO get a user from your database and fill the user data to model.
+        $user = new \Xsolla\SDK\Webhook\User();
+        $user->setId('user_id')
+            ->setPublicId($userPublicId)
+            ->setEmail('user_email') //Optional field
+            ->setPhone('user_phone') //Optional field
+            ->setName('user_name'); //Optional field
+        //TODO if user not found, you should throw InvalidUserException
+        return new \Xsolla\SDK\Webhook\Response\UserResponse($user);
+    }
+};
+$webhookServer = WebhookServer::create($callback, PROJECT_KEY);
+$webhookServer->start();
+```
+
+### Успешный платеж
+Когда пользователь успешно совершает оплату, XSOLLA отправляет детали о платеже на webhook URL.
+
+Поле | Тип | Описание
+---- | --- | --------
+notification_type|string|Тип оповещения. Обязательный.
+purchase|object|Объект с информацией о заказе.
+purchase.virtual_currency|object|Объект с данными о приобретенной виртуальной валюте.
+purchase.virtual_currency.name|string|Название виртуальной валюты.
+purchase.virtual_currency.sku|string|Артикул пакета виртуальной валюты (если задан для пакета виртуальной валюты).
+purchase.virtual_currency.quantity|float|Количество бонусного товара.
+purchase.virtual_currency.currency|string|Трехбуквенное обозначение виртуальной валюты заказа согласно стандарту ISO 4217.
+purchase.virtual_currency.amount|float|Сумма покупки.
+purchase.checkout|object|Объект с информацией о заказе.
+purchase.checkout.currency|string|Трехбуквенное обозначение валюты заказа согласно стандарту ISO 4217.
+purchase.checkout.amount|float|Сумма заказа.
+purchase.subscription|object|Объект с данными о подписке.
+purchase.subscription.plan_id|string|ID плана (внешний id, если план был создан через API).
+purchase.subscription.subscription_id|integer|ID подписки в базе данных XSOLLA.
+purchase.subscription.product_id|string|ID продукта (если был отправлен в токене).
+purchase.subscription.tags|array|Теги плана.
+purchase.subscription.date_create|string|Дата и время создания подписки согласно стандарту ISO 8601.
+purchase.subscription.date_next_charge|string|Дата и время следующего списания согласно стандарту ISO 8601.
+purchase.subscription.currency|string|Трехбуквенное обозначение валюты рекуррентного плана согласно стандарту ISO 4217.
+purchase.subscription.amount|float|Сумма покупки.
+purchase.virtual_items|object|Объект с данными о предметах в покупке.
+purchase.virtual_items.items|array|Массив с данными о предмете.
+purchase.virtual_items.items.sku|string|ID предмета (артикул).
+purchase.virtual_items.items.amount|integer|Количество этого предмета в заказе.
+purchase.virtual_items.currency|string|Трехбуквенное обозначение валюты заказа согласно стандарту ISO 4217.
+purchase.virtual_items.amount|integer|Сумма заказа.
+purchase.pin_codes|object|Массив с данными о ключах.
+purchase.pin_codes.digital_content|string|Артикул игры, настраивается в Личном кабинете.
+purchase.pin_codes.drm|string|DRM-платформа, на которой игра будет доступна. Может принимать значения 'steam', 'playstation', 'xbox', 'uplay', 'origin', 'drmfree', 'gog', 'epicgames', 'nintendo_eshop', 'discord_game_store' или 'oculus'. Перед использованием необходимо убедиться, что нужная DRM-платформа настроена в Личном кабинете.
+purchase.pin_codes.currency|string|Трехбуквенное обозначение валюты покупки согласно стандарту ISO 4217.
+purchase.pin_codes.amount|float|Стоимость ключа.
+purchase.pin_codes.upgrade|object|Объект с информацией об апгрейде.
+purchase.pin_codes.upgrade.digital_content_from|object|Объект с информацией о пакете пользователя, с которого был произведен апгрейд.
+purchase.pin_codes.upgrade.digital_content_from.digital_content|string|Артикул игры, настраивается в Личном кабинете.
+purchase.pin_codes.upgrade.digital_content_from.DRM|string|DRM-платформа игры.
+purchase.pin_codes.upgrade.digital_content_to|object|Объект с информацией о пакете, на который пользователь перешел в рамках апгрейда.
+purchase.pin_codes.upgrade.digital_content_to.digital_content|string|Артикул игры, настраивается в Личном кабинете.
+purchase.pin_codes.upgrade.digital_content_to.DRM|string|DRM-платформа игры.
+purchase.pin_codes.upgrade.currency|string|Трехбуквенное обозначение валюты покупки согласно стандарту ISO 4217.
+purchase.pin_codes.upgrade.amount|float|Сумма покупки.
+purchase.gift|object|Объект с информацией о подарке.
+purchase.gift.giver_id|string|ID дарителя.
+purchase.gift.receiver_ID|string|ID получателя подарка.
+purchase.gift.receiver_email|string|Email получателя подарка.
+purchase.gift.message|string|Сообщение от дарителя.
+purchase.gift.hide_giver_from_receiver|string|Флаг, показывающий видимость дарителя получателю подарка.
+purchase.total|object|Объект с данными об общей стоимости покупки. Обязательный.
+purchase.total.currency|string|Трехбуквенное обозначение валюты заказа согласно стандарту ISO 4217.
+purchase.total.amount|float|Общая сумма покупки.
+purchase.promotions|array|Массив с данными акций, которые действуют на данную покупку.
+purchase.promotions.technical_name|string|Техническое название акции.
+purchase.promotions.id|integer|ID акции.
+purchase.coupon|object|Объект с информацией о купоне (если при создании подписки был использован купон).
+purchase.coupon.coupon_code|string|Код купона.
+purchase.coupon.campaign_code|string|Код кампании купонов.
+user|object|Объект с информацией о пользователе.
+user.ip|string|IP адрес пользователя.
+user.phone|string|Номер телефона пользователя (в международном формате).
+user.email|string|Email пользователя.
+user.id|string|ID пользователя. Обязательный.
+user.name|string|Имя пользователя.
+user.country|string|Двухбуквенное обозначение страны пользователя согласно стандарту ISO 3166-1 alpha-2.
+user.zip|string|Почтовый индекс.
+transaction|object|Объект с информацией о транзакции, связанной с этой операцией. Обязательный.
+transaction.id|integer|ID транзакции.
+transaction.external_id|string|Внешний ID транзакции.
+transaction.payment_date|string|Дата платежа.
+transaction.payment_method|integer|ID способа оплаты в системе XSOLLA.
+transaction.dry_run|integer|Признак тестовой транзакции: 1 — тестовый платеж, 0 — реальный платеж.
+transaction.agreement|integer|ID соглашения.
+payment_details|object|Объект с финансовыми данными платежа. Обязательный.
+payment_details.payment|object|Объект с данными о сумме, которую оплатил пользователь.
+payment_details.payment.currency|string|Трехбуквенное обозначение валюты согласно стандарту ISO 4217.
+payment_details.payment.amount|string|Сумма.
+payment_details.payment_method_sum|object|Объект с данными о сумме, которая была оплачена из платежной системы.
+payment_details.payment_method_sum.currency|string|Трехбуквенное обозначение валюты согласно стандарту ISO 4217.
+payment_details.payment_method_sum.amount|string|Сумма.
+payment_details.xsolla_balance_sum|object|Объект с данными о сумме, которая была оплачена с XSOLLA-баланса.
+payment_details.xsolla_balance_sum.currency|string|Трехбуквенное обозначение валюты согласно стандарту ISO 4217.
+payment_details.xsolla_balance_sum.amount|string|Сумма.
+payment_details.payout|object|Объект с данными о сумме выплаты.
+payment_details.payout.currency|string|Трехбуквенное обозначение валюты согласно стандарту ISO 4217.
+payment_details.payout.amount|float|Сумма.
+payment_details.vat|object|Размер VAT (только для Евросоюза).
+payment_details.vat.currency|string|Трехбуквенное обозначение валюты согласно стандарту ISO 4217.
+payment_details.vat.amount|float|Сумма.
+payment_details.payout_currency_rate|float|Курс валюты платежа к валюте выплаты.
+payment_details.xsolla_fee|object|Размер комиссии XSOLLA.
+payment_details.xsolla_fee.currency|string|Трехбуквенное обозначение валюты согласно стандарту ISO 4217.
+payment_details.xsolla_fee.amount|float|Сумма.
+payment_details.payment_method_fee|object|Размер комиссии платежной системы.
+payment_details.payment_method_fee.currency|string|Трехбуквенное обозначение валюты согласно стандарту ISO 4217.
+payment_details.payment_method_fee.amount|float|Сумма.
+payment_details.sales_tax|object|Размер налога (только для США).
+payment_details.sales_tax.currency|string|Трехбуквенное обозначение валюты согласно стандарту ISO 4217.
+payment_details.sales_tax.amount|float|Сумма.
+payment_details.repatriation_commission|object|Объект с информацией о затратах на репатриацию, возлагаемых на XSOLLA третьими сторонами.
+payment_details.repatriation_commission.currency|string|Трехбуквенное обозначение валюты затрат на репатриацию согласно стандарту ISO 4217.
+payment_details.repatriation_commission.amount|float|Сумма затрат на репатриацию.
+custom_parameters|object|Дополнительные параметры.
+
+Примеры проведения платежа: 
+
+***HTTP***
+```HTTP
+ЗАПРОС
+POST /your_uri HTTP/1.1
+Host: your.host
+Accept: application/json
+Content-Type: application/json
+Content-Length: 1721
+Authorization: Signature 34553d151e656110c656696c919f9a10e05de542
+
+{
+    "notification_type":"payment",
+    "purchase":{
+        "virtual_currency":{
+            "name":"Coins",
+            "sku":"test_package1",
+            "quantity":10,
+            "currency":"USD",
+            "amount":100
+        },
+        "subscription":{
+            "plan_id": "b5dac9c8",
+            "subscription_id": "10",
+            "product_id": "Demo Product",
+            "date_create": "2014-09-22T19:25:25+04:00",
+            "date_next_charge": "2014-10-22T19:25:25+04:00",
+            "currency": "USD",
+            "amount": 9.99
+        },
+        "checkout":{
+            "currency":"USD",
+            "amount":50
+        },
+        "virtual_items":{
+            "items":[
+                {
+                    "sku": "test_item1",
+                    "amount":1
+                }
+            ],
+            "currency":"USD",
+            "amount":50
+        },
+        "total":{
+            "currency":"USD",
+            "amount":200
+        },
+        "promotions":[{
+            "technical_name":"Demo Promotion",
+            "id":"853"
+        }],
+        "coupon":{
+            "coupon_code":"ICvj45S4FUOyy",
+            "campaign_code":"1507"
+        }
+    },
+    "user": {
+        "ip": "127.0.0.1",
+        "phone": "18777976552",
+        "email": "email@example.com",
+        "id": "1234567",
+        "name": "Xsolla User",
+        "country": "US"
+    },
+    "transaction":{
+        "id":1,
+        "external_id":1,
+        "payment_date":"2014-09-24T20:38:16+04:00",
+        "payment_method":1,
+        "dry_run":1,
+        "agreement":1
+    },
+    "payment_details":{
+        "payment":{
+            "currency":"USD",
+            "amount":230
+        },
+        "vat": {
+            "currency": "USD",
+            "amount": 0
+        },
+        "payout_currency_rate": 1,
+        "payout":{
+            "currency":"USD",
+            "amount":200
+        },
+        "xsolla_fee":{
+            "currency":"USD",
+            "amount":10
+        },
+        "payment_method_fee":{
+            "currency":"USD",
+            "amount":20
+        },
+        "repatriation_commission":{
+            "currency":"USD",
+            "amount":"10"
+        }
+    },
+    "custom_parameters":{
+        "parameter1":"value1",
+        "parameter2":"value2"
+    }
+}
+ОТВЕТ
+HTTP/1.1 204 No Content
+```
+
+***CURL***
+```CURL
+ЗАПРОС
+$curl -v 'https://your.hostname/your/uri' \
+-X POST \
+-d '{
+    "notification_type":"payment",
+    "purchase":{
+        "virtual_currency":{
+            "name":"Coins",
+            "sku":"test_package1",
+            "quantity":10,
+            "currency":"USD",
+            "amount":100
+        },
+        "subscription":{
+            "plan_id": "b5dac9c8",
+            "subscription_id": "10",
+            "product_id": "Demo Product",
+            "date_create": "2014-09-22T19:25:25+04:00",
+            "date_next_charge": "2014-10-22T19:25:25+04:00",
+            "currency": "USD",
+            "amount": 9.99
+        },
+        "checkout":{
+            "currency":"USD",
+            "amount":50
+        },
+        "virtual_items":{
+            "items":[
+                {
+                    "sku": "test_item1",
+                    "amount":1
+                }
+            ],
+            "currency":"USD",
+            "amount":50
+        },
+        "total":{
+            "currency":"USD",
+            "amount":200
+        },
+        "promotions":[{
+            "technical_name":"Demo Promotion",
+            "id":"853"
+        }],
+        "coupon":{
+             "coupon_code":"ICvj45S4FUOyy",
+             "campaign_code":"1507"
+        }
+    },
+    "user": {
+        "ip": "127.0.0.1",
+        "phone": "18777976552",
+        "email": "email@example.com",
+        "id": "1234567",
+        "name": "Xsolla User",
+        "country": "US"
+    },
+    "transaction":{
+        "id":1,
+        "external_id":1,
+        "payment_date":"2014-09-24T20:38:16+04:00",
+        "payment_method":1,
+        "dry_run":1,
+        "agreement":1
+    },
+    "payment_details":{
+        "payment":{
+            "currency":"USD",
+            "amount":230
+        },
+        "vat": {
+            "currency": "USD",
+            "amount": 0
+        },
+        "payout_currency_rate": 1,
+        "payout":{
+            "currency":"USD",
+            "amount":200
+        },
+        "xsolla_fee":{
+            "currency":"USD",
+            "amount":10
+        },
+        "payment_method_fee":{
+            "currency":"USD",
+            "amount":20
+        },
+        "repatriation_commission":{
+            "currency":"USD",
+            "amount":"10"
+        }
+    },
+    "custom_parameters":{
+        "parameter1":"value1",
+        "parameter2":"value2"
+    }
+}'
+ОТВЕТ
+```
+
+***PHP***
+```PHP
+ЗАПРОС
+<?php
+
+$request = array(
+    'notification_type' => 'payment',
+    'purchase' => array(
+        'virtual_currency' => array(
+            'name' => 'Coins',
+            'quantity' => 100,
+            'currency' => 'USD',
+            'amount' => 9.99
+        ),
+        'total' => array(
+            'currency' => 'USD',
+            'amount' => 9.99
+        )
+    ),
+    'user' => array(
+        'ip' => '127.0.0.1',
+        'phone' => '18777976552',
+        'email' => 'email@example.com',
+        'id' => '1234567',
+        'country' => 'US'
+    ),
+    'transaction' => array(
+        'id' => 87654321,
+        'payment_date' => '2014-09-23T19:25:25+04:00',
+        'payment_method' => 1380,
+        'dry_run' => 1
+    ),
+    'payment_details' => array(
+        'payment' => array(
+            'currency' => 'USD',
+            'amount' => 9.99
+        ),
+        'vat' => array(
+            'currency' => 'USD',
+            'amount' => 0
+        ),
+        'payout_currency_rate' => 1,
+        'payout' => array(
+            'currency' => 'USD',
+            'amount' => 9.49
+        ),
+        'xsolla_fee' => array(
+            'currency' => 'USD',
+            'amount' => 0.19
+        ),
+        'payment_method_fee' => array(
+            'currency' => 'USD',
+            'amount' => 0.31
+        ),
+        'repatriation_commission' => array(
+            'currency' => 'USD',
+            'amount' => 0.2
+        )
+    )
+);
+ОТВЕТ
+<?php
+
+use Xsolla\SDK\Webhook\WebhookServer;
+use Xsolla\SDK\Webhook\Message\Message;
+use Xsolla\SDK\Exception\Webhook\XsollaWebhookException;
+
+$callback = function (Message $message) {
+    if ($message->isPayment()) {
+        $userArray = $message->getUser();
+        $paymentArray = $message->getTransaction();
+        $paymentId = $message->getPaymentId();
+        $externalPaymentId = $message->getExternalPaymentId();
+        $paymentDetailsArray = $message->getPaymentDetails();
+        $customParametersArray = $message->getCustomParameters();
+        $isDryRun = $message->isDryRun();
+        $messageArray = $message->toArray();
+        // TODO if the payment delivery fails for some reason, you should throw XsollaWebhookException
+    }
+};
+
+$webhookServer = WebhookServer::create($callback, PROJECT_KEY);
+$webhookServer->start();
+```
+
+### Отмена платежа
+При отмене платежа XSOLLA присылает детали отмененной транзакции на webhook URL.
+
+Поле | Тип | Описание
+---- | --- | --------
+notification_type|string|Тип оповещения. Обязательный.
+purchase|object|Объект с информацией о заказе.
+purchase.virtual_currency|object|Объект с данными о приобретенной виртуальной валюте.
+purchase.virtual_currency.name|string|Название виртуальной валюты.
+purchase.virtual_currency.quantity|float|Количество бонусного товара.
+purchase.virtual_currency.currency|string|Трехбуквенное обозначение валюты заказа согласно стандарту ISO 4217.
+purchase.virtual_currency.amount|float|Сумма покупки.
+purchase.checkout|object|Объект с информацией о заказе.
+purchase.checkout.currency|string|Трехбуквенное обозначение валюты заказа согласно стандарту ISO 4217.
+purchase.checkout.amount|float|Сумма заказа.
+purchase.subscription|object|Объект с данными о подписке.
+purchase.subscription.plan_id|string|ID плана (внешний id, если план был создан через API).
+purchase.subscription.tags|array|Теги плана.
+purchase.subscription.subscription_id|integer|ID подписки в базе данных Иксоллы.
+purchase.subscription.date_create|string|Дата и время создания подписки согласно стандарту ISO 8601.
+purchase.subscription.currency|string|Трехбуквенное обозначение валюты рекуррентного плана согласно стандарту ISO 4217.
+purchase.subscription.amount|float|Сумма покупки.
+purchase.virtual_items|object|Объект с данными о предметах в покупке.
+purchase.virtual_items.items|array|Массив с данными о предмете.
+purchase.virtual_items.items.sku|string|ID предмета (артикул).
+purchase.virtual_items.items.amount|integer|Количество этого предмета в заказе.
+purchase.virtual_items.currency|string|Трехбуквенное обозначение валюты заказа согласно стандарту ISO 4217.
+purchase.virtual_items.amount|integer|Сумма заказа.
+purchase.pin_codes|object|Объект с данными о ключе.
+purchase.pin_codes.upgrade|object|Объект с информацией об апгрейде.
+purchase.pin_codes.upgrade.digital_content_from|object|Объект с информацией о пакете пользователя, с которого был произведен апгрейд.
+purchase.pin_codes.upgrade.digital_content_from.digital_content|string|Артикул игры, настраивается в Личном кабинете.
+purchase.pin_codes.upgrade.digital_content_from.DRM|string|DRM-платформа игры.
+purchase.pin_codes.upgrade.digital_content_to|object|Объект с информацией о пакете, на который пользователь перешел в рамках апгрейда.
+purchase.pin_codes.upgrade.digital_content_to.digital_content|string|Артикул игры, настраивается в Личном кабинете.
+purchase.pin_codes.upgrade.digital_content_to.DRM|string|DRM-платформа игры.
+purchase.pin_codes.upgrade.currency|string|Трехбуквенное обозначение валюты покупки согласно стандарту ISO 4217.
+purchase.pin_codes.upgrade.amount|float|Сумма покупки.
+purchase.total|object|Объект с данными об общей стоимости покупки.
+purchase.total.currency|string|Трехбуквенное обозначение валюты заказа согласно стандарту ISO 4217.
+purchase.total.amount|float|Общая сумма покупки.
+user|object|Объект с информацией о пользователе.
+user.ip|string|IP адрес пользователя.
+user.phone|string|Номер телефона пользователя (в международном формате).
+user.email|string|Email пользователя.
+user.id|string|ID пользователя. Обязательный.
+user.name|string|Имя пользователя.
+user.country|string|Двухбуквенное обозначение страны пользователя согласно стандарту ISO 3166-1 alpha-2.
+user.zip|string|Почтовый индекс.
+transaction|object|Объект с информацией о транзакции, связанной с этой операцией. Обязательный.
+transaction.id|integer|ID транзакции.
+transaction.external_id|string|Внешний ID транзакции.
+transaction.dry_run|integer|Признак тестовой транзакции: 1 — тестовый платеж, 0 — реальный платеж.
+transaction.agreement|integer|ID соглашения.
+refund_details|object|Объект с финансовыми данными рефанда.
+refund_details.code|integer|ID кода.
+refund_details.reason|string|Причина отмены.
+refund_details.author|string|Автор рефанда.
+payment_details|object|Объект с финансовыми данными платежа. Обязательный.
+payment_details.payment|object|Объект с данными о сумме, которую оплатил пользователь.
+payment_details.payment.currency|string|Трехбуквенное обозначение валюты согласно стандарту ISO 4217.
+payment_details.payment.amount|string|Сумма.
+payment_details.payment_method_sum|object|Объект с данными о сумме, которая была оплачена из платежной системы.
+payment_details.payment_method_sum.currency|string|Трехбуквенное обозначение валюты согласно стандарту ISO 4217.
+payment_details.payment_method_sum.amount|string|Сумма.
+payment_details.xsolla_balance_sum|object|Объект с данными о сумме, которая была оплачена с Иксолла-баланса.
+payment_details.xsolla_balance_sum.currency|string|Трехбуквенное обозначение валюты согласно стандарту ISO 4217.
+payment_details.xsolla_balance_sum.amount|string|Сумма.
+payment_details.payout|object|Объект с данными о сумме выплаты.
+payment_details.payout.currency|string|Трехбуквенное обозначение валюты согласно стандарту ISO 4217.
+payment_details.payout.amount|float|Сумма.
+payment_details.vat|object|Размер VAT (только для Евросоюза).
+payment_details.vat.currency|string|Трехбуквенное обозначение валюты согласно стандарту ISO 4217.
+payment_details.vat.amount|float|Сумма.
+payment_details.payout_currency_rate|float|Курс валюты платежа к валюте выплаты.
+payment_details.xsolla_fee|object|Размер комиссии XSOLLA.
+payment_details.xsolla_fee.currency|string|Трехбуквенное обозначение валюты согласно стандарту ISO 4217.
+payment_details.xsolla_fee.amount|float|Сумма.
+payment_details.payment_method_fee|object|Размер комиссии платежной системы.
+payment_details.payment_method_fee.currency|string|Трехбуквенное обозначение валюты согласно стандарту ISO 4217.
+payment_details.payment_method_fee.amount|float|Сумма.
+payment_details.sales_tax|object|Размер налога (только для США).
+payment_details.sales_tax.currency|string|Трехбуквенное обозначение валюты согласно стандарту ISO 4217.
+payment_details.sales_tax.amount|float|Сумма.
+payment_details.repatriation_commission|object|Объект с информацией о затратах на репатриацию, возлагаемых на Иксоллу третьими сторонами.
+payment_details.repatriation_commission.currency|string|Трехбуквенное обозначение валюты затрат на репатриацию согласно стандарту ISO 4217.
+payment_details.repatriation_commission.amount|float|Сумма затрат на репатриацию.
+custom_parameters|object|Дополнительные параметры.
+
+Коды отмены:
+
+Код | Причина отмены | Описание
+--- | -------------- | --------
+1.|Cancellation by the user request / the game request.|Используется, если отмена произошла из Личного кабинета.
+2.|Chargeback.|Используется, если по транзакции был chargeback.
+3.|Integration Error.|Используется в случае проблем с интеграцией между XSOLLA и игрой. В этом случае не рекомендуется заносить пользователя в черный список.
+4.|Fraud.|Используется в случае потенциального фрода.
+5.|Test Payment.|Используется в случае совершения тестового платежа с последующей отменой. В этом случае не рекомендуется заносить пользователя в черный список.
+6.|Expired Invoice.|Используется, если был выбран способ оплаты с системой отложенного платежа.
+7.|PS debt cancel.|Используется, если транзакция была совершена через платежную систему, которая не произвела выплату по данной транзакции. В этом случае не рекомендуется заносить пользователя в черный список.
+8.|Cancellation by the PS request.|Используется, когда платежная система запросила отмену транзакции. В этом случае не рекомендуется заносить пользователя в черный список.
+9.|Cancellation by the user request.|Используется, если игра или заказ не удовлетворяют требованиям пользователя по каким-либо причинам. В этом случае не рекомендуется заносить пользователя в черный список.
+10.|Cancellation by the game request.|Используется, когда игра просит отменить транзакцию. В этом случае не рекомендуется заносить пользователя в черный список.
+11.|Account holder called to report fraud.|Используется, когда владелец аккаунта сообщил, что не совершал данный платеж.
+12.|Friendly fraud.|Используется, если нам сообщили о friendly fraud.
+
+Примеры отмены платежа:
+
+***HTTP***
+```HTTP
+ЗАПРОС
+POST /your_uri HTTP/1.1
+Host: your.host
+Accept: application/json
+Content-Type: application/json
+Content-Length: 1220
+Authorization: Signature 31bd5924dd6cbc9cbe99d331c4a086a57291f9d7
+
+{
+    "notification_type":"refund",
+    "purchase":{
+        "virtual_currency":{
+            "name": "Coins",
+            "quantity":10,
+            "currency":"USD",
+            "amount":100
+        },
+        "subscription":{
+            "plan_id": "b5dac9c8",
+            "subscription_id": "10",
+            "date_create": "2014-09-22T19:25:25+04:00",
+            "currency": "USD",
+            "amount": 9.99
+        },
+        "checkout":{
+            "currency":"USD",
+            "amount":50
+        },
+        "virtual_items":{
+            "items":[
+                {
+                    "sku": "test_item1",
+                    "amount":1
+                }
+            ],
+            "currency":"USD",
+            "amount":50
+        },
+        "total":{
+            "currency":"USD",
+            "amount":200
+        }
+    },
+    "user": {
+        "ip": "127.0.0.1",
+        "phone": "18777976552",
+        "email": "email@example.com",
+        "id": "1234567",
+        "name": "Xsolla User",
+        "country": "US"
+    },
+    "transaction":{
+        "id":1,
+        "external_id":1,
+        "dry_run":1,
+        "agreement":1
+    },
+    "refund_details":{
+        "code":1,
+        "reason":"Fraud"
+    },
+    "payment_details":{
+        "xsolla_fee":{
+            "currency":"USD",
+            "amount":"10"
+        },
+        "payout":{
+            "currency":"USD",
+            "amount":"200"
+        },
+        "payment_method_fee":{
+            "currency":"USD",
+            "amount":"20"
+        },
+        "payment":{
+            "currency":"USD",
+            "amount":"230"
+        },
+        "repatriation_commission":{
+            "currency":"USD",
+            "amount":"10"
+        }
+    }
+}
+ОТВЕТ
+HTTP/1.1 204 No Content
+```
+
+***CURL***
+```CURL
+ЗАПРОС
+$ curl -v 'https://your.hostname/your/uri' \
+-X POST \
+-d '{
+        "notification_type":"refund",
+        "purchase":{
+            "virtual_currency":{
+                "name": "Coins",
+                "quantity":10,
+                "currency":"USD",
+                "amount":100
+            },
+            "subscription":{
+                "plan_id": "b5dac9c8",
+                "subscription_id": "10",
+                "date_create": "2014-09-22T19:25:25+04:00",
+                "currency": "USD",
+                "amount": 9.99
+            },
+            "checkout":{
+                "currency":"USD",
+                "amount":50
+            },
+            "virtual_items":{
+                "items":[
+                    {
+                        "sku": "test_item1",
+                        "amount":1
+                    }
+                ],
+                "currency":"USD",
+                "amount":50
+            },
+            "total":{
+                "currency":"USD",
+                "amount":200
+            }
+        },
+        "user": {
+            "ip": "127.0.0.1",
+            "phone": "18777976552",
+            "email": "email@example.com",
+            "id": "1234567",
+            "name": "Xsolla User",
+            "country": "US"
+        },
+        "transaction":{
+            "id":1,
+            "external_id":1,
+            "dry_run":1,
+            "agreement":1
+        },
+        "refund_details":{
+            "code":1,
+            "reason":"Fraud"
+        },
+        "payment_details":{
+            "xsolla_fee":{
+                "currency":"USD",
+                "amount":"10"
+            },
+            "payout":{
+                "currency":"USD",
+                "amount":"200"
+            },
+            "payment_method_fee":{
+                "currency":"USD",
+                "amount":"20"
+            },
+            "payment":{
+                "currency":"USD",
+                "amount":"230"
+            },
+            "repatriation_commission":{
+                "currency":"USD",
+                "amount":"10"
+            }
+        }
+    }
+}'
+ОТВЕТ
+```
+
+***PHP***
+```PHP
+ЗАПРОС
+<?php
+
+$request = array(
+    'notification_type' => 'refund',
+    'purchase' => array(
+        'virtual_currency' => array(
+            'name' => 'Coins',
+            'quantity' => 100,
+            'currency' => 'USD',
+            'amount' => 9.99
+        ),
+        'total' => array(
+            'currency' => 'USD',
+            'amount' => 9.99
+        )
+    ),
+    'user' => array(
+        'ip' => '127.0.0.1',
+        'phone' => '18777976552',
+        'email' => 'email@example.com',
+        'id' => '1234567',
+        'country' => 'US'
+    ),
+    'transaction' => array(
+        'id' => 87654321,
+        'payment_date' => '2014-09-23T19:25:25+04:00',
+        'payment_method' => 1380,
+        'dry_run' => 1
+    ),
+    'refund_details' => array(
+            'code' => 1,
+            'reason' => 'Fraud'
+    ),
+    'payment_details' => array(
+        'payment' => array(
+            'currency' => 'USD',
+            'amount' => 9.99
+        ),
+        'vat' => array(
+            'currency' => 'USD',
+            'amount' => 0
+        ),
+        'payout_currency_rate' => 1,
+        'payout' => array(
+            'currency' => 'USD',
+            'amount' => 9.49
+        ),
+        'xsolla_fee' => array(
+            'currency' => 'USD',
+            'amount' => 0.19
+        ),
+        'payment_method_fee' => array(
+            'currency' => 'USD',
+            'amount' => 0.31
+        ),
+        'repatriation_commission' => array(
+            'currency' => 'USD',
+            'amount' => 0.2
+        )
+    )
+);
+ОТВЕТ
+<?php
+
+use Xsolla\SDK\Webhook\WebhookServer;
+use Xsolla\SDK\Webhook\Message\Message;
+use Xsolla\SDK\Exception\Webhook\XsollaWebhookException;
+
+$callback = function (Message $message) {
+    if ($message->isRefund()) {
+        $userArray = $message->getUser();
+        $paymentArray = $message->getTransaction();
+        $paymentId = $message->getPaymentId();
+        $externalPaymentId = $message->getExternalPaymentId();
+        $paymentDetailsArray = $message->getPaymentDetails();
+        $customParametersArray = $message->getCustomParameters();
+        $isDryRun = $message->isDryRun();
+        $refundArray = $message->getRefundDetails();
+        $messageArray = $message->toArray();
+        // TODO if you cannot handle the refund, you should throw XsollaWebhookException
+    }
+};
+
+$webhookServer = WebhookServer::create($callback, PROJECT_KEY);
+$webhookServer->start();
+```
+
+### Отмена апгрейда
+Если пользователь отменил платеж, связанный с апгрейдом, XSOLLA отправляет данные об отмененных апгрейдах и текущем пакете на webhook URL.
+
+Поле | Тип | Описание
+---- | --- | --------
+notification_type|string|Тип оповещения. Обязательный.
+purchase|object|Объект с информацией о покупке. Обязательный.
+purchase.pin_codes|object|Объект с информацией о купленных пакетах игры.
+purchase.pin_codes.purchase_type|string|Тип покупки. Принимает значения “regular” – покупка пакета, “upgrade” – апгрейд пакета.
+purchase.pin_codes.digital_content|string|Артикул игры, настраивается в Личном кабинете.
+purchase.pin_codes.DRM|string|DRM-платформа игры.
+purchase.pin_codes.currency|string|Трехбуквенное обозначение валюты покупки согласно стандарту ISO 4217.
+purchase.pin_codes.amount|float|Сумма покупки.
+purchase.pin_codes.transaction|object|Объект с информацией о транзакции.
+purchase.pin_codes.transaction.id|integer|ID транзакции.
+purchase.pin_codes.upgrade|object|Объект с информацией об апгрейде.
+purchase.pin_codes.upgrade.digital_content_from|object|Объект с информацией о пакете пользователя, с которого был произведен апгрейд.
+purchase.pin_codes.upgrade.digital_content_from.digital_content|string|Артикул игры, настраивается в Личном кабинете.
+purchase.pin_codes.upgrade.digital_content_from.DRM|string|DRM-платформа игры.
+purchase.pin_codes.upgrade.digital_content_to|object|Объект с информацией о пакете, на который пользователь перешел в рамках апгрейда.
+purchase.pin_codes.upgrade.digital_content_to.digital_content|string|Артикул игры, настраивается в Личном кабинете.
+purchase.pin_codes.upgrade.digital_content_to.DRM|string|DRM-платформа игры.
+ownership|object|Объект с информацией о пакетах, которыми владеет пользователь. Обязательный.
+ownership.digital_content|string|Артикул игры, настраивается в Личном кабинете.
+ownership.DRM|string|DRM-платформа игры.
+
+Примеры отмены апгрейда:
+
+***HTTP***
+```HTTP
+ЗАПРОС
+POST /your_uri HTTP/1.1
+Host: your.host
+Accept: application/json
+Content-Type: application/json
+Authorization: Signature <signature>
+
+{
+  "notification_type": "upgrade_refund",
+  "purchase": {
+    "pin_codes": [
+      {
+        "purchase_type": "regular",
+        "digital_content": "silver",
+        "DRM": "drmfree",
+        "currency": "USD",
+        "amount": "40",
+        "transaction": {
+          "id": "361697569"
+        }
+      },
+      {
+        "purchase_type": "upgrade",
+        "upgrade": {
+          "digital_content_from": {
+            "digital_content": "silver",
+            "DRM": "drmfree"
+          },
+          "digital_content_to": {
+            "digital_content": "gold",
+            "DRM": "drmfree"
+          }
+        },
+        "currency": "USD",
+        "amount": "20",
+        "transaction": {
+          "id": "361697570"
+        }
+      },
+      {
+        "purchase_type": "upgrade",
+        "upgrade": {
+          "digital_content_from": {
+            "digital_content": "gold",
+            "DRM": "drmfree"
+          },
+          "digital_content_to": {
+            "digital_content": "platinum",
+            "DRM": "drmfree"
+          }
+        },
+        "currency": "USD",
+        "amount": "20",
+        "transaction": {
+          "id": "361697571"
+        }
+      }
+    ]
+  },
+  "ownership": {
+    "digital_content": null,
+    "DRM": null
+  }
+}
+ОТВЕТ
+```
+
+***CURL***
+```CURL
+ЗАПРОС
+$ curl -v 'https://your.hostname/your/uri' \
+-X POST \
+-d '{
+  "notification_type": "upgrade_refund",
+  "purchase": {
+    "pin_codes": [
+      {
+        "purchase_type": "regular",
+        "digital_content": "silver",
+        "DRM": "drmfree",
+        "currency": "USD",
+        "amount": "40",
+        "transaction": {
+          "id": "361697569"
+        }
+      },
+      {
+        "purchase_type": "upgrade",
+        "upgrade": {
+          "digital_content_from": {
+            "digital_content": "silver",
+            "DRM": "drmfree"
+          },
+          "digital_content_to": {
+            "digital_content": "gold",
+            "DRM": "drmfree"
+          }
+        },
+        "currency": "USD",
+        "amount": "20",
+        "transaction": {
+          "id": "361697570"
+        }
+      },
+      {
+        "purchase_type": "upgrade",
+        "upgrade": {
+          "digital_content_from": {
+            "digital_content": "gold",
+            "DRM": "drmfree"
+          },
+          "digital_content_to": {
+            "digital_content": "platinum",
+            "DRM": "drmfree"
+          }
+        },
+        "currency": "USD",
+        "amount": "20",
+        "transaction": {
+          "id": "361697571"
+        }
+      }
+    ]
+  },
+  "ownership": {
+    "digital_content": null,
+    "DRM": null
+  }
+}'
+ОТВЕТ
+```
+
+***PHP***
+```PHP
+ЗАПРОС
+<?php
+
+$request = array (
+  'notification_type' => 'upgrade_refund',
+  'purchase' =>
+  array (
+    'pin_codes' =>
+    array (
+      0 =>
+      array (
+        'purchase_type' => 'regular',
+        'digital_content' => 'silver',
+        'DRM' => 'drmfree',
+        'currency' => 'USD',
+        'amount' => '40',
+        'transaction' =>
+        array (
+          'id' => '361697569',
+        ),
+      ),
+      1 =>
+      array (
+        'purchase_type' => 'upgrade',
+        'upgrade' =>
+        array (
+          'digital_content_from' =>
+          array (
+            'digital_content' => 'silver',
+            'DRM' => 'drmfree',
+          ),
+          'digital_content_to' =>
+          array (
+            'digital_content' => 'gold',
+            'DRM' => 'drmfree',
+          ),
+        ),
+        'currency' => 'USD',
+        'amount' => '20',
+        'transaction' =>
+        array (
+          'id' => '361697570'
+        ),
+      ),
+      2 =>
+      array (
+        'purchase_type' => 'upgrade',
+        'upgrade' =>
+        array (
+          'digital_content_from' =>
+          array (
+            'digital_content' => 'gold',
+            'DRM' => 'drmfree',
+          ),
+          'digital_content_to' =>
+          array (
+            'digital_content' => 'platinum',
+            'DRM' => 'drmfree',
+          ),
+        ),
+        'currency' => 'USD',
+        'amount' => '20',
+        'transaction' =>
+        array (
+          'id' => '361697571'
+        ),
+      ),
+    ),
+  ),
+  'ownership' =>
+  array (
+    'digital_content' => NULL,
+    'DRM' => NULL,
+  ),
+)
+ОТВЕТ
+```
+
+### Транзакция отклонена при проверке AFS
+Если транзакция была отклонена при проверке AFS, XSOLLA присылает детали транзакции на webhook URL. Для включения оповещения необходимо обратиться к аккаунт-менеджеру проекта.
+
+Поле | Тип | Описание
+---- | --- | --------
+notification_type|string|Тип оповещения. Обязательный.
+user|object|Объект с информацией о пользователе.
+user.ip|string|IP адрес пользователя.
+user.phone|string|Номер телефона пользователя (в международном формате).
+user.email|string|Email пользователя.
+user.id|string|ID пользователя. Обязательный.
+user.name|string|Имя пользователя.
+user.country|string|Двухбуквенное обозначение страны пользователя согласно стандарту ISO 3166-1 alpha-2.
+user.zip|string|Почтовый индекс.
+transaction|object|Объект с информацией о транзакции, связанной с этой операцией. Обязательный.
+transaction.id|integer|ID транзакции.
+transaction.external_id|string|Внешний ID транзакции.
+transaction.dry_run|integer|Признак тестовой транзакции: 1 — тестовый платеж, 0 — реальный платеж.
+transaction.agreement|integer|ID соглашения.
+refund_details|object|Объект с финансовыми данными рефанда.
+refund_details.code|integer|ID кода.
+refund_details.reason|string|Причина отмены.
+refund_details.author|string|Автор рефанда.
+
+Примеры отклонения транзакции при проверке AFS:
+
+***HTTP***
+```HTTP
+ЗАПРОС
+POST /your_uri HTTP/1.1
+Host: your.host
+Accept: application/json
+Content-Type: application/json
+Content-Length: 1220
+Authorization: Signature 31bd5924dd6cbc9cbe99d331c4a086a57291f9d7
+
+{
+    "notification_type":"afs_reject",
+    "user": {
+        "ip": "127.0.0.1",
+        "phone": "18777976552",
+        "email": "semail@example.com,
+        "id": "1234567",
+        "name": "Xsolla User",
+        "country": "US"
+    },
+    "transaction":{
+        "id":1,
+        "external_id":1,
+        "dry_run":1,
+        "agreement":1
+    },
+    "refund_details":{
+        "code":4,
+        "reason":"Potential fraud"
+    }
+}
+ОТВЕТ
+HTTP/1.1 204 No Content
+```
+
+***CURL***
+```CURL
+ЗАПРОС
+$ curl -v 'https://your.hostname/your/uri' \
+-X POST \
+-d '{
+  "notification_type":"afs_reject",
+  "user": {
+      "ip": "127.0.0.1",
+      "phone": "18777976552",
+      "email": "semail@example.com,
+      "id": "1234567",
+      "name": "Xsolla User",
+      "country": "US"
+  },
+  "transaction":{
+      "id":1,
+      "external_id":1,
+      "dry_run":1,
+      "agreement":1
+  },
+  "refund_details":{
+      "code":4,
+      "reason":"Potential fraud"
+  }
+}'
+ОТВЕТ
+```
+
+***PHP***
+```PHP
+ЗАПРОС
+<?php
+
+$request = array(
+    'notification_type' => 'afs_reject',
+    'user' => array(
+        'ip' => '127.0.0.1',
+        'phone' => '18777976552',
+        'email' => 'email@example.com',
+        'id' => '1234567',
+        'country' => 'US'
+    ),
+    'transaction' => array(
+        'id' => 87654321,
+        'payment_date' => '2014-09-23T19:25:25+04:00',
+        'payment_method' => 1380,
+        'dry_run' => 1
+    ),
+    'refund_details' => array(
+            'code' => 4,
+            'reason' => 'Potential fraud'
+    )
+);
+ОТВЕТ
+<?php
+
+use Xsolla\SDK\Webhook\WebhookServer;
+use Xsolla\SDK\Webhook\Message\Message;
+use Xsolla\SDK\Exception\Webhook\XsollaWebhookException;
+
+$callback = function (Message $message) {
+    if ($message->isRefund()) {
+        $userArray = $message->getUser();
+        $paymentArray = $message->getTransaction();
+        $paymentId = $message->getPaymentId();
+        $externalPaymentId = $message->getExternalPaymentId();
+        $customParametersArray = $message->getCustomParameters();
+        $isDryRun = $message->isDryRun();
+        $refundArray = $message->getRefundDetails();
+        $messageArray = $message->toArray();
+        // TODO if you cannot handle the refund, you should throw XsollaWebhookException
+    }
+};
+
+$webhookServer = WebhookServer::create($callback, PROJECT_KEY);
+$webhookServer->start();
+```
+
+### Создание подписки
+Когда пользователь создает подписку, XSOLLA присылает оповещение на webhook URL.
+
+Поле | Тип | Описание
+---- | --- | --------
+notification_type|string|Тип оповещения. Обязательный.
+user|object|Объект с информацией о пользователе.
+user.id|string|ID пользователя. Обязательный.
+user.name|string|Имя пользователя.
+subscription|object|Объект с данными о подписке.
+subscription.plan_id|string|ID плана (внешний id, если план был создан через API).
+subscription.tags|array|Теги плана.
+subscription.subscription_id|integer|ID подписки в базе данных XSOLLA.
+subscription.product_id|string|ID продукта (если был отправлен в токене).
+subscription.date_create|string|Дата и время создания подписки согласно стандарту ISO 8601.
+subscription.date_next_charge|string|Дата и время следующего списания согласно стандарту ISO 8601.
+subscription.trial|object|Объект с информацией о триальном периоде подписки.
+subscription.trial.value|integer|Длительность триального периода.
+subscription.trial.type|string|Тип триального периода: day.
+
+Примеры создания подписки:
+
+***HTTP***
+```HTTP
+ЗАПРОС
+POST /your/uri HTTP/1.1
+Host: your.hostname
+Accept: application/json
+Content-Type: application/json
+Content-Length: 240
+Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
+
+{
+    "notification_type":"create_subscription",
+    "user":{
+        "id":"1234567",
+        "name":"Xsolla User"
+    },
+    "subscription":{
+        "plan_id":"b5dac9c8",
+        "subscription_id":"10",
+        "product_id":"Demo Product",
+        "date_create":"2014-09-22T19:25:25+04:00",
+        "date_next_charge":"2015-01-22T19:25:25+04:00",
+        "trial": {
+                "value": 90,
+                "type": "day"
+            }
+    }
+}
+ОТВЕТ
+HTTP/1.1 204 No Content
+```
+
+***CURL***
+```CURL
+ЗАПРОС
+$ curl -v 'https://your.hostname/your/uri' \
+-X POST \
+-H 'Accept: application/json' \
+-H 'Content-Type: application/json' \
+-H 'Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f' \
+-d '{
+        "notification_type":"create_subscription",
+        "user":{
+            "id":"1234567",
+            "name":"Xsolla User"
+        },
+        "subscription":{
+            "plan_id":"b5dac9c8",
+            "subscription_id":"10",
+            "product_id":"Demo Product",
+            "date_create":"2014-09-22T19:25:25+04:00",
+            "date_next_charge":"2015-01-22T19:25:25+04:00",
+            "trial": {
+                    "value": 90,
+                    "type": "day"
+                }
+        }
+    }'
+ОТВЕТ
+```
+
+***PHP***
+```PHP
+ЗАПРОС
+<?php
+
+$request = array(
+    'notification_type' => 'create_subscription',
+    'user' => array(
+        'id' => '1234567',
+        'name' => 'Xsolla User'
+    ),
+    'subscription' => array(
+        'plan_id' => 'b5dac9c8',
+        'subscription_id' => '10',
+        'product_id' => 'Demo Product',
+        'date_create' => '2014-09-22T19:25:25+04:00',
+        'date_next_charge' => '2015-01-22T19:25:25+04:00',
+        'trial' =>  array(
+                'value' =>  90,
+                'type' =>  'day'
+            )
+    )
+);
+ОТВЕТ
+<?php
+
+use Xsolla\SDK\Webhook\WebhookServer;
+use Xsolla\SDK\Webhook\Message\Message;
+use Xsolla\SDK\Exception\Webhook\XsollaWebhookException;
+
+$callback = function (Message $message) {
+    if ($message instanceof CreateSubscriptionMessage) {
+       $messageArray = $message->toArray();
+       // TODO if the subscription creation fails for some reason, you should throw XsollaWebhookException
+    }
+};
+
+$webhookServer = WebhookServer::create($callback, PROJECT_KEY);
+$webhookServer->start();
+```
+
+### Изменение подписки
+В случае изменения каких-либо параметров ('plan_id', 'date_next_charge') подписки и в случае каждого продления подписки, XSOLLA отправляет оповещение "update_subscription" на webhook URL.
+
+Поле | Тип | Описание
+---- | --- | --------
+notification_type|string|Тип оповещения. Обязательный.
+user|object|Объект с информацией о пользователе.
+user.id|string|ID пользователя. Обязательный.
+user.name|string|Имя пользователя.
+subscription|object|Объект с данными о подписке.
+subscription.plan_id|string|ID плана (внешний id, если план был создан через API).
+subscription.tags|array|Теги плана.
+subscription.subscription_id|integer|ID подписки в базе данных XSOLLA.
+subscription.product_id|string|ID продукта (если был отправлен в токене).
+subscription.date_next_charge|string|Дата и время следующего списания согласно стандарту ISO 8601.
+
+Примеры изменения подписки:
+
+***HTTP***
+```HTTP
+ЗАПРОС
+POST /your/uri HTTP/1.1
+Host: your.hostname
+Accept: application/json
+Content-Type: application/json
+Content-Length: 240
+Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
+
+{
+    "notification_type":"update_subscription",
+    "user":{
+        "id":"1234567",
+        "name":"Xsolla User"
+    },
+    "subscription":{
+        "plan_id":"b5dac9c8",
+        "subscription_id":"10",
+        "product_id":"Demo Product",
+        "date_next_charge":"2015-01-22T19:25:25+04:00"
+    }
+}
+ОТВЕТ
+HTTP/1.1 204 No Content
+```
+
+***CURL***
+```CURL
+ЗАПРОС
+$ curl -v 'https://your.hostname/your/uri' \
+-X POST \
+-H 'Accept: application/json' \
+-H 'Content-Type: application/json' \
+-H 'Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f' \
+-d '{
+        "notification_type":"update_subscription",
+        "user":{
+            "id":"1234567",
+            "name":"Xsolla User"
+        },
+        "subscription":{
+            "plan_id":"b5dac9c8",
+            "subscription_id":"10",
+            "product_id":"Demo Product",
+            "date_next_charge":"2015-01-22T19:25:25+04:00"
+        }
+    }'
+ОТВЕТ
+```
+
+***PHP***
+```PHP
+ЗАПРОС
+<?php
+
+$request = array(
+    'notification_type' => 'update_subscription',
+    'user' => array(
+        'id' => '1234567',
+        'name' => 'Xsolla User'
+    ),
+    'subscription' => array(
+        'plan_id' => 'b5dac9c8',
+        'subscription_id' => '10',
+        'product_id' => 'Demo Product',
+        'date_next_charge' => '2015-01-22T19:25:25+04:00'
+    )
+);
+ОТВЕТ
+<?php
+
+use Xsolla\SDK\Webhook\WebhookServer;
+use Xsolla\SDK\Webhook\Message\Message;
+use Xsolla\SDK\Exception\Webhook\XsollaWebhookException;
+
+$callback = function (Message $message) {
+  if ($message instanceof UpdateSubscriptionMessage) {
+     $messageArray = $message->toArray();
+     // TODO if the subscription renewing fails for some reason, you should throw XsollaWebhookException
+  }
+};
+
+$webhookServer = WebhookServer::create($callback, PROJECT_KEY);
+$webhookServer->start();
+```
+
+### Отмена подписки
+Когда подписка отменяется по каким-либо причинам, XSOLLA присылает оповещение на webhook URL.
+
+Поле | Тип | Описание
+---- | --- | --------
+notification_type|string|Тип оповещения. Обязательный.
+user|object|Объект с информацией о пользователе.
+user.id|string|ID пользователя. Обязательный.
+user.name|string|Имя пользователя.
+subscription|object|Объект с данными о подписке.
+subscription.plan_id|string|ID плана (внешний id, если план был создан через API).
+subscription.tags|array|Теги плана.
+subscription.subscription_id|integer|ID подписки в базе данных XSOLLA.
+subscription.product_id|string|ID продукта (если был отправлен в токене).
+subscription.date_create|string|Дата и время создания подписки согласно стандарту ISO 8601.
+subscription.date_end|string|Дата и время окончания срока действия подписки согласно стандарту ISO 8601.
+
+Примеры изменения подписки:
+
+***HTTP***
+```HTTP
+ЗАПРОС
+POST /your/uri HTTP/1.1
+Host: your.hostname
+Accept: application/json
+Content-Type: application/json
+Content-Length: 240
+Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
+
+{
+    "notification_type":"cancel_subscription",
+    "user":{
+        "id":"1234567",
+        "name":"Xsolla User"
+    },
+    "subscription":{
+        "plan_id":"b5dac9c8",
+        "subscription_id":"10",
+        "product_id":"Demo Product",
+        "date_create":"2014-09-22T19:25:25+04:00",
+        "date_end":"2015-01-22T19:25:25+04:00"
+    }
+}
+ОТВЕТ
+HTTP/1.1 204 No Content
+```
+
+***CURL***
+```CURL
+ЗАПРОС
+$ curl -v 'https://your.hostname/your/uri' \
+-X POST \
+-H 'Accept: application/json' \
+-H 'Content-Type: application/json' \
+-H 'Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f' \
+-d '{
+        "notification_type":"cancel_subscription",
+        "user":{
+            "id":"1234567",
+            "name":"Xsolla User"
+        },
+        "subscription":{
+            "plan_id":"b5dac9c8",
+            "subscription_id":"10",
+            "product_id":"Demo Product",
+            "date_create":"2014-09-22T19:25:25+04:00",
+            "date_end":"2015-01-22T19:25:25+04:00"
+        }
+    }'
+ОТВЕТ
+```
+
+***PHP***
+```PHP
+ЗАПРОС
+<?php
+
+$request = array(
+    'notification_type' => 'cancel_subscription',
+    'user' => array(
+        'id' => '1234567',
+        'name' => 'Xsolla User'
+    ),
+    'subscription' => array(
+        'plan_id' => 'b5dac9c8',
+        'subscription_id' => '10',
+        'product_id' => 'Demo Product',
+        'date_create' => '2014-09-22T19:25:25+04:00',
+        'date_end' => '2015-01-22T19:25:25+04:00',
+    )
+);
+ОТВЕТ
+<?php
+
+use Xsolla\SDK\Webhook\WebhookServer;
+use Xsolla\SDK\Webhook\Message\Message;
+use Xsolla\SDK\Exception\Webhook\XsollaWebhookException;
+
+$callback = function (Message $message) {
+    if ($message instanceof CancelSubscriptionMessage) {
+       $messageArray = $message->toArray();
+       // TODO if the subscription canceling fails for some reason, you should throw XsollaWebhookException
+    }
+};
+
+$webhookServer = WebhookServer::create($callback, PROJECT_KEY);
+$webhookServer->start();
+```
+
+
+
+
+
+Поле | Тип | Описание
+---- | --- | --------
+
+***HTTP***
+```HTTP
+
+```
+
+***CURL***
+```CURL
+
+```
+
+***PHP***
+```PHP
+
+```
