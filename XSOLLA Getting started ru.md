@@ -2773,30 +2773,1013 @@ limit|string|Лимит количества элементов на стран�
 offset|integer|Номер элемента, c которого выполняется вывод на странице (нумерация ведется с 0).
 sign|string|Строка для подписи формируется следующим образом:<ul><li>notification_type + значения параметров, отсортированных по ключу в алфавитном порядке + secret_key</li><li>Второй шаг — применение SHA-1 криптографической хэш-функции к получившейся на первом шаге строке.</li></ul>
 
-
-
-
-
-
-
-
-
-
-
-Поле | Тип | Описание
----- | --- | --------
+Примеры получения списка друзей:
 
 ***HTTP***
 ```HTTP
+ЗАПРОС
+GET https://your.webhook.url?notification_type=friends_list&user=user_id&query=frien&offset=10&limit=20&sign=12dfg3f5gdsf4g5s6dfg2sdg1 HTTP/1.1
+Host: your.host
+Accept: application/json
+Content-Type: application/json
+Content-Length: 1220
+Authorization: Signature 31bd5924dd6cbc9cbe99d331c4a086a57291f9d7
+ОТВЕТ
+HTTP/1.1 200 OK
+Content-Type: application/json
 
+[
+  {
+    "friends": [
+      {
+        "id": "1",
+        "name": "doctor",
+        "email": "doctor@hospital.com",
+        "image_url": "https://partner/link/doctor.jpg"
+      },
+      {
+        "id": "2",
+        "name": "cook",
+        "email": "cook@kitchen.com",
+        "image_url": "https://partner/link/cook.jpg"
+      },
+      {
+        "id": "3",
+        "name": "teacher",
+        "email": "teacher@school.com"
+      },
+      {
+        "id": "4",
+        "name": "god",
+        "email": "god@heaven.com",
+        "image_url": "https://partner/link/god.jpg"
+      }
+      ],
+    "total": 10
+  }
+]
 ```
 
 ***CURL***
 ```CURL
+ЗАПРОС
+$ curl -v 'https://your.webhook.url?notification_type=friends_list&user=user_id&query=frien&offset=10&limit=20&sign=12dfg3f5gdsf4g5s6dfg2sdg1' \
+-X GET \
+-u merchant_id:merchant_api_key
+ОТВЕТ
+[
+  {
+  "friends": [
+      {
+        "id": "1",
+        "name": "John Carter",
+        "email": "carter@xsolla.com",
+        "image_url": "https://partner/link/doctor.jpg"
+      },
+      {
+        "id": "2",
+        "name": "John Smith",
+        "email": "smith@xsolla.com",
+        "image_url": "https://partner/link/cook.jpg"
+      }
+    ],
+  "total": 10
+  }
+]
+```
 
+### Баланс пользователя: внутренняя операция
+Когда пользователь совершает платеж, XSOLLA присылает специальное оповещение об изменении баланса пользователя.
+
+Поле | Тип | Описание
+---- | --- | --------
+notification_type|string|Тип оповещения.
+operation_type|string|Тип операции.
+id_operation|integer|ID операции в базе данных XSOLLA.
+user|object|Объект с информацией о пользователе.
+user.id|string|ID пользователя. Обязательный.
+user.name|string|Имя пользователя.
+user.email|string|Email пользователя.
+virtual_currency_balance|object|Объект с данными о балансе пользователя.
+virtual_currency_balance.old_value|string|Значение баланса до совершения данной операции.
+virtual_currency_balance.new_value|string|Значение баланса после совершения данной операции.
+virtual_currency_balance.diff|string|Количество виртуальной валюты в заказе.
+transaction|object|Объект с информацией о транзакции, связанной с этой операцией. Обязательный.
+transaction.id|integer|ID транзакции.
+transaction.date|string|Дата транзакции.
+
+Примеры: 
+
+***HTTP***
+```HTTP
+ЗАПРОС
+POST /your/uri HTTP/1.1
+Host: your.hostname
+Accept: application/json
+Content-Type: application/json
+Content-Length: 240
+Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
+
+{
+    "virtual_currency_balance":{
+        "old_value":"0",
+        "new_value":"200",
+        "diff":"200"
+    },
+    "user":{
+        "name":"Xsolla User",
+        "id":"1234567",
+        "email":"email@example.com"
+    },
+    "transaction":{
+        "id":"123456789",
+        "date":"2015-05-19T15:54:40+03:00"
+    },
+    "operation_type":"payment",
+    "notification_type":"user_balance_operation",
+    "id_operation":"66989"
+}
+ОТВЕТ
+HTTP/1.1 204 No Content
+```
+
+***CURL***
+```CURL
+ЗАПРОС
+$ curl -v 'https://your.hostname/your/uri' \
+-X POST \
+-H 'Accept: application/json' \
+-H 'Content-Type: application/json' \
+-H 'Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f' \
+-d '{
+        "virtual_currency_balance":{
+            "old_value":"0",
+            "new_value":"200",
+            "diff":"200"
+        },
+        "user":{
+            "name":"Xsolla User",
+            "id":"1234567",
+            "email":"email@example.com"
+        },
+        "transaction":{
+            "id":"123456789",
+            "date":"2015-05-19T15:54:40+03:00"
+        },
+        "operation_type":"payment",
+        "notification_type":"user_balance_operation",
+        "id_operation":"66989"
+    }'
+ОТВЕТ
 ```
 
 ***PHP***
 ```PHP
+ЗАПРОС
+<?php
 
+$request = array(
+    'virtual_currency_balance' => array(
+        'old_value' => '0',
+        'new_value' => '200',
+        'diff' => '200'
+    ),
+    'user' => array(
+        'name' => 'Xsolla User',
+        'id' => '1234567',
+        'email' => 'email@example.com'
+    ),
+    'transaction => array(
+        'id' => '123456789',
+        'date' => '2015-05-19T15:54:40+03:00'
+    ),
+    'operation_type' => 'payment',
+    'notification_type' => 'user_balance_operation',
+    'id_operation' => '66989'
+);
+ОТВЕТ
+<?php
+
+use Xsolla\SDK\Webhook\WebhookServer;
+use Xsolla\SDK\Webhook\Message\Message;
+use Xsolla\SDK\Exception\Webhook\XsollaWebhookException;
+
+$callback = function (Message $message) {
+    if ($message instanceof UserBalanceMessage) {
+       $messageArray = $message->toArray();
+       // TODO if the user balance operation fails for some reason, you should throw XsollaWebhookException
+    }
+};
+
+$webhookServer = WebhookServer::create($callback, PROJECT_KEY);
+$webhookServer->start();
 ```
+
+### Баланс пользователя: покупка в игре
+Когда пользователь совершает покупку в игре (например, покупка предметов), XSOLLA присылает специальное оповещение об изменении баланса пользователя.
+
+Поле | Тип | Описание
+---- | --- | --------
+notification_type|string|Тип оповещения.
+operation_type|string|Тип операции.
+id_operation|integer|ID операции в базе данных XSOLLA.
+user|object|Объект с информацией о пользователе.
+user.id|string|ID пользователя. Обязательный.
+user.name|string|Имя пользователя.
+user.email|string|Email пользователя.
+virtual_currency_balance|object|Объект с данными о балансе пользователя.
+virtual_currency_balance.old_value|string|Значение баланса до совершения данной операции.
+virtual_currency_balance.new_value|string|Значение баланса после совершения данной операции.
+virtual_currency_balance.diff|string|Количество виртуальной валюты в заказе.
+items_operation_type|string|Тип операции с предметами.
+items|array|Массив данных о предмете в заказе.
+items.sku|string|ID предмета (артикул).
+items.amount|integer|Количество экземпляров предмета в заказе.
+
+Примеры покупки в игре:
+
+***HTTP***
+```HTTP
+ЗАПРОС
+POST /your/uri HTTP/1.1
+Host: your.hostname
+Accept: application/json
+Content-Type: application/json
+Content-Length: 240
+Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
+
+{
+    "virtual_currency_balance":{
+        "old_value":"0",
+        "new_value":"200",
+        "diff":"200"
+    },
+    "user":{
+        "name":"Xsolla User",
+        "id":"1234567",
+        "email":"email@example.com"
+    },
+    "operation_type":"inGamePurchase",
+    "notification_type":"user_balance_operation",
+    "items_operation_type": "add",
+         "items": [{
+         "sku": "1468",
+         "amount": "2"
+         }],
+    "id_operation":"66989"
+}
+ОТВЕТ
+HTTP/1.1 204 No Content
+```
+
+***CURL***
+```CURL
+ЗАПРОС
+$ curl -v 'https://your.hostname/your/uri' \
+-X POST \
+-H 'Accept: application/json' \
+-H 'Content-Type: application/json' \
+-H 'Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f' \
+-d '{
+        "virtual_currency_balance":{
+            "old_value":"0",
+            "new_value":"200",
+            "diff":"200"
+        },
+        "user":{
+            "name":"Xsolla User",
+            "id":"1234567",
+            "email":"email@example.com"
+        },
+        "operation_type":"inGamePurchase",
+        "notification_type":"user_balance_operation",
+        "items_operation_type": "add",
+             "items": [{
+             "sku": "1468",
+             "amount": "2"
+             }],
+        "id_operation":"66989"
+    }'
+ОТВЕТ
+```
+
+***PHP***
+```PHP
+ЗАПРОС
+<?php
+
+$request = array(
+    'virtual_currency_balance' => array(
+            'old_value' => '0',
+            'new_value' => '200',
+            'diff' => '200'
+    ),
+    'user' => array(
+        'name' => 'Xsolla User',
+        'id' => '1234567',
+        'email' => 'email@example.com'
+    ),
+    'operation_type' => 'inGamePurchase',
+    'notification_type' => 'user_balance_operation',
+    'items_operation_type' =>  'add',
+         'items' =>  array(
+             'sku' =>  '1468',
+             'amount' =>  '2'
+         ),
+    'id_operation' => '66989'
+);
+ОТВЕТ
+<?php
+
+use Xsolla\SDK\Webhook\WebhookServer;
+use Xsolla\SDK\Webhook\Message\Message;
+use Xsolla\SDK\Exception\Webhook\XsollaWebhookException;
+
+$callback = function (Message $message) {
+    if ($message instanceof UserBalanceMessage) {
+       $messageArray = $message->toArray();
+       // TODO if the user balance operation fails for some reason, you should throw XsollaWebhookException
+    }
+};
+
+$webhookServer = WebhookServer::create($callback, PROJECT_KEY);
+$webhookServer->start();
+```
+
+### Баланс пользователя: активация купона
+Если пользователь активировал купон для получения предметов или виртуальной валюты в игре, XSOLLA присылает специальное оповещение об изменении баланса пользователя.
+
+Поле | Тип | Описание
+---- | --- | --------
+notification_type|string|Тип оповещения.
+operation_type|string|Тип операции.
+id_operation|integer|ID операции в базе данных XSOLLA.
+user|object|Объект с информацией о пользователе.
+user.id|string|ID пользователя. Обязательный.
+user.name|string|Имя пользователя.
+user.email|string|Email пользователя.
+virtual_currency_balance|object|Объект с данными о балансе пользователя.
+virtual_currency_balance.old_value|string|Значение баланса до совершения данной операции.
+virtual_currency_balance.new_value|string|Значение баланса после совершения данной операции.
+virtual_currency_balance.diff|string|Количество виртуальной валюты в заказе.
+items_operation_type|string|Тип операции с предметами.
+items|array|Массив данных о предмете в заказе.
+items.sku|string|ID предмета (артикул).
+items.amount|integer|Количество экземпляров предмета в заказе.
+coupon|object|Объект с данными о купоне.
+coupon.coupon_code|string|Код купона.
+coupon.campaign_code|string|Код кампании купонов.
+
+Примеры активации купона:
+
+***HTTP***
+```HTTP
+ЗАПРОС
+POST /your/uri HTTP/1.1
+Host: your.hostname
+Accept: application/json
+Content-Type: application/json
+Content-Length: 240
+Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
+
+{
+    "virtual_currency_balance":{
+        "old_value":"0",
+        "new_value":"0",
+        "diff":"0"
+    },
+    "user":{
+        "name":"Xsolla User",
+        "id":"1234567",
+        "email":"email@example.com"
+    },
+    "operation_type":"coupon",
+    "notification_type":"user_balance_operation",
+    "items_operation_type": "add",
+         "items": [{
+             "sku": "1468",
+             "amount": "2"
+         }],
+    "id_operation":"66989",
+    "coupon": {
+         "coupon_code": "test123",
+         "campaign_code": "Xsolla Campaign"
+    }
+}
+ОТВЕТ
+HTTP/1.1 204 No Content
+```
+
+***CURL***
+```CURL
+ЗАПРОС
+$ curl -v 'https://your.hostname/your/uri' \
+-X POST \
+-H 'Accept: application/json' \
+-H 'Content-Type: application/json' \
+-H 'Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f' \
+-d '{
+        "virtual_currency_balance":{
+            "old_value":"0",
+            "new_value":"0",
+            "diff":"0"
+        },
+        "user":{
+            "name":"Xsolla User",
+            "id":"1234567",
+            "email":"email@example.com"
+        },
+        "operation_type":"coupon",
+        "notification_type":"user_balance_operation",
+        "items_operation_type": "add",
+             "items": [{
+                 "sku": "1468",
+                 "amount": "2"
+             }],
+        "id_operation":"66989",
+        "coupon": {
+             "coupon_code": "test123",
+             "campaign_code": "Xsolla Campaign"
+        }
+    }'
+ОТВЕТ
+```
+
+***PHP***
+```PHP
+ЗАПРОС
+<?php
+
+$request = array(
+    'virtual_currency_balance' => array(
+        'old_value' => '0',
+        'new_value' => '0',
+        'diff' => '0'
+    ),
+    'user' => array(
+        'name' => 'Xsolla User',
+        'id' => '1234567',
+        'email' => 'email@example.com'
+    ),
+    'operation_type' => 'coupon',
+    'notification_type' => 'user_balance_operation',
+    'items_operation_type' =>  'add',
+         'items' =>  array(
+             'sku' =>  '1468',
+             'amount' =>  '2'
+         ),
+    'id_operation' => '66989',
+    'coupon' =>  array(
+         'coupon_code' =>  'test123',
+         'campaign_code' =>  'Xsolla Campaign'
+    )
+);
+ОТВЕТ
+<?php
+
+use Xsolla\SDK\Webhook\WebhookServer;
+use Xsolla\SDK\Webhook\Message\Message;
+use Xsolla\SDK\Exception\Webhook\XsollaWebhookException;
+
+$callback = function (Message $message) {
+    if ($message instanceof UserBalanceMessage) {
+       $messageArray = $message->toArray();
+       // TODO if the user balance operation fails for some reason, you should throw XsollaWebhookException
+    }
+};
+
+$webhookServer = WebhookServer::create($callback, PROJECT_KEY);
+$webhookServer->start();
+```
+
+### Баланс пользователя: изменение вручную
+Если необходимо изменить баланс пользователя вручную, можно использовать тип операции "Internal".
+
+Поле | Тип | Описание
+---- | --- | --------
+notification_type|string|Тип оповещения.
+operation_type|string|Тип операции.
+id_operation|integer|ID операции в базе данных XSOLLA.
+user|object|Объект с информацией о пользователе.
+user.id|string|ID пользователя. Обязательный.
+user.name|string|Имя пользователя.
+user.email|string|Email пользователя.
+virtual_currency_balance|object|Объект с данными о балансе пользователя.
+virtual_currency_balance.old_value|string|Значение баланса до совершения данной операции.
+virtual_currency_balance.new_value|string|Значение баланса после совершения данной операции.
+virtual_currency_balance.diff|string|Количество виртуальной валюты в заказе.
+
+Примеры изменения баланса:
+
+***HTTP***
+```HTTP
+ЗАПРОС
+POST /your/uri HTTP/1.1
+Host: your.hostname
+Accept: application/json
+Content-Type: application/json
+Content-Length: 240
+Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
+
+{
+    "virtual_currency_balance":{
+        "old_value":"0",
+        "new_value":"100",
+        "diff":"100"
+    },
+    "user":{
+        "name":"Xsolla User",
+        "id":"1234567",
+        "email":"email@example.com"
+    },
+    "operation_type":"internal",
+    "notification_type":"user_balance_operation",
+    "id_operation":"67002"
+}
+ОТВЕТ
+HTTP/1.1 204 No Content
+```
+
+***CURL***
+```CURL
+ЗАПРОС
+$ curl -v 'https://your.hostname/your/uri' \
+-X POST \
+-H 'Accept: application/json' \
+-H 'Content-Type: application/json' \
+-H 'Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f' \
+-d '{
+        "virtual_currency_balance":{
+            "old_value":"0",
+            "new_value":"100",
+            "diff":"100"
+        },
+        "user":{
+            "name":"Xsolla User",
+            "id":"1234567",
+            "email":"email@example.com"
+        },
+        "operation_type":"internal",
+        "notification_type":"user_balance_operation",
+        "id_operation":"67002"
+    }'
+ОТВЕТ
+```
+
+***PHP***
+```PHP
+<?php
+
+$request = array(
+    'virtual_currency_balance' => array(
+        'old_value' => '0',
+        'new_value' => '100',
+        'diff' => '100'
+    ),
+    'user' => array(
+        'name' => 'Xsolla User',
+        'id' => '1234567',
+        'email' => 'email@example.com'
+    ),
+    'operation_type' => 'internal',
+    'notification_type' => 'user_balance_operation',
+    'id_operation' => '67002'
+);
+```
+
+### Баланс пользователя: отмена платежа
+Когда пользователь отменяет платеж, XSOLLA присылает специальное оповещение об изменении баланса пользователя.
+
+Поле | Тип | Описание
+---- | --- | --------
+notification_type|string|Тип оповещения.
+operation_type|string|Тип операции.
+id_operation|integer|ID операции в базе данных XSOLLA.
+user|object|Объект с информацией о пользователе.
+user.id|string|ID пользователя. Обязательный.
+user.name|string|Имя пользователя.
+user.email|string|Email пользователя.
+virtual_currency_balance|object|Объект с данными о балансе пользователя.
+virtual_currency_balance.old_value|string|Значение баланса до совершения данной операции.
+virtual_currency_balance.new_value|string|Значение баланса после совершения данной операции.
+virtual_currency_balance.diff|string|Количество виртуальной валюты в заказе.
+transaction|object|Объект с информацией о транзакции, связанной с этой операцией. Обязательный.
+transaction.id|integer|ID транзакции.
+transaction.date|string|Дата транзакции.
+items_operation_type|string|Тип операции с предметами.
+items|array|Массив данных о предмете в заказе.
+items.sku|string|ID предмета (артикул).
+items.amount|integer|Количество этого предмета в заказе.
+
+Примеры отмены платежа:
+
+***HTTP***
+```HTTP
+POST /your/uri HTTP/1.1
+Host: your.hostname
+Accept: application/json
+Content-Type: application/json
+Content-Length: 240
+Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
+
+{
+    "virtual_currency_balance":{
+        "old_value":"0",
+        "new_value":"0",
+        "diff":"0"
+    },
+    "user":{
+        "name":"Xsolla User",
+        "id":"1234567",
+        "email":"email@example.com"
+    },
+    "transaction":{
+        "id":"123456789",
+        "date":"2015-05-19T15:54:40+03:00"
+    },
+    "operation_type":"cancellation",
+    "notification_type":"user_balance_operation",
+    "items_operation_type": "remove",
+         "items": [{
+             "sku": "1468",
+             "amount": "2"
+         }],
+    "id_operation":"66989"
+}
+```
+
+***CURL***
+```CURL
+$ curl -v 'https://your.hostname/your/uri' \
+-X POST \
+-H 'Accept: application/json' \
+-H 'Content-Type: application/json' \
+-H 'Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f' \
+-d '{
+        "virtual_currency_balance":{
+            "old_value":"0",
+            "new_value":"0",
+            "diff":"0"
+        },
+        "user":{
+            "name":"Xsolla User",
+            "id":"1234567",
+            "email":"email@example.com"
+        },
+        "transaction":{
+            "id":"123456789",
+            "date":"2015-05-19T15:54:40+03:00"
+        },
+        "operation_type":"cancellation",
+        "notification_type":"user_balance_operation",
+        "items_operation_type": "remove",
+             "items": [{
+                 "sku": "1468",
+                 "amount": "2"
+             }],
+        "id_operation":"66989"
+    }'
+```
+
+***PHP***
+```PHP
+<?php
+
+$request = array(
+     'virtual_currency_balance' => array(
+         'old_value' => '0',
+         'new_value' => '0',
+         'diff' => '0'
+     ),
+     'user' => array(
+         'name' => 'Xsolla User',
+         'id' => '1234567',
+         'email' => 'email@example.com'
+     ),
+     'transaction' => array(
+         'id' => '123456789',
+         'date' => '2015-05-19T15:54:40+03:00'
+     ),
+     'operation_type' => 'cancellation',
+     'notification_type' => 'user_balance_operation',
+     'items_operation_type' =>  'remove',
+         'items' =>  array(
+             'sku' =>  '1468',
+             'amount' =>  '2'
+         ),
+     'id_operation' => '66989'
+);
+```
+
+### Вторичный рынок: отправка списка предметов
+Когда вторичный рынок запрашивает данные о предметах из инвентаря игры, XSOLLA присылает оповещение на webhook URL.
+
+Поле | Тип | Описание
+---- | --- | --------
+notification_type|string|Тип оповещения.
+project_id|integer|ID проекта.
+payload|object|Объект с информацией о пользователе и вторичном рынке.
+payload.user|object|Объект с информацией о пользователе.
+payload.user.id|string|ID пользователя.
+payload.secondary_market|object|Объект с информацией о вторичном рынке.
+payload.secondary_market.id|string|ID вторичного рынка.
+
+Примеры отправки списка предметов:
+
+***HTTP***
+```HTTP
+POST /your_uri HTTP/1.1
+Host: your.host
+Content-Type: application/json
+Authorization: Signature sha1(body + project_secret)
+
+{
+    "notification_type": "inventory_get",
+    "project_id": 1024,
+    "payload": {
+         "user": {
+             "id": "username"
+              },
+          "secondary_market": {
+              "id": "1"
+          }
+     }  
+}
+```
+
+***CURL***
+```CURL
+$ curl -v 'https://your.hostname/your/uri' \
+-X POST \
+-u merchant_id:merchant_api_key \
+-H 'Content-Type: application/json' \
+-d '{
+    "notification_type": "inventory_get",
+    "project_id": 1024,
+    "payload": {
+         "user": {
+             "id": "username"
+          },
+          "secondary_market": {
+              "id": "1"
+          }
+     }  
+}
+```
+
+***PHP***
+```PHP
+<?php
+
+$request = array(
+ 'notification_type' => 'inventory_get',
+ 'project_id' => 1024,
+ 'payload' => array(
+   'user' => array(
+     'id' => 'username'
+   ),
+   'secondary_market' => array(
+     'id' => '1'
+   ),
+ ),
+);
+```
+
+### Вторичный рынок: отправка предметов из игры
+Когда вторичный рынок запрашивает предметы из инвентаря игры, XSOLLA присылает оповещение на webhook URL.
+
+
+Поле | Тип | Описание
+---- | --- | --------
+notification_type|string|Тип оповещения.
+project_id|integer|ID проекта.
+payload|object|Объект с информацией о пользователе и вторичном рынке.
+payload.user|object|Объект с информацией о пользователе.
+payload.user.id|string|ID пользователя.
+items|array|Массив с информацией о предметах.
+items.sku|string|Артикул предмета.
+items.instance_id|string|Уникальный ID предмета в игре.
+payload.secondary_market|object|Объект с информацией о вторичном рынке.
+payload.secondary_market.id|string|ID вторичного рынка.
+
+Примеры отправки предметов:
+
+***HTTP***
+```HTTP
+POST /your_uri HTTP/1.1
+Host: your.host
+Content-Type: application/json
+Authorization: Signature sha1(body + project_secret)
+
+{
+    "notification_type": "inventory_pull",
+    "project_id": 1024,
+    "payload": {
+        "user": {
+            "id": "username"
+        },
+        "items": [
+            {
+                "sku": "sku1",
+                "instance_id": "instance1"
+            },
+            {
+                "sku": "sku2",
+                "instance_id": "instance2"
+            },
+        ],
+        "secondary_market": {
+            "id": "1"
+        }
+    }
+}
+```
+
+***CURL***
+```CURL
+$ curl -v 'https://your.hostname/your/uri' \
+-X POST \
+-u merchant_id:merchant_api_key \
+-H 'Content-Type: application/json' \
+-d '{
+    "notification_type": "inventory_pull",
+    "project_id": 1024,
+    "payload": {
+         "user": {
+             "id": "username"
+              },
+         "items": [
+            {
+                "sku": "sku1",
+                "instance_id": "instance1"
+            },
+            {
+                "sku": "sku2",
+                "instance_id": "instance2"
+            }
+          ],
+          "secondary_market": {
+              "id": "1"
+          }
+     }  
+}
+```
+
+***PHP***
+```PHP
+<?php
+
+$request = array(
+  'notification_type' => 'inventory_pull',
+  'project_id' => 1024,
+  'payload' => array(
+    'user' => array(
+      'id' => 'username'
+    ),
+    'items' => array(
+      array(
+        'sku' => 'sku1',
+        'instance_id' => 'instance1'
+      ),
+      array(
+        'sku' => 'sku2',
+        'instance_id' => 'instance2'
+      ),
+    )
+    'secondary_market' => array(
+      'id' => '1'
+    ),
+  ),
+);
+```
+
+### Вторичный рынок: получение предметов в игру
+Когда вторичный рынок отправляет предметы в инвентарь игры, XSOLLA присылает оповещение на webhook URL.
+
+Поле | Тип | Описание
+---- | --- | --------
+notification_type|string|Тип оповещения.
+project_id|integer|ID проекта.
+payload|object|Объект с информацией о пользователе и вторичном рынке.
+payload.user|object|Объект с информацией о пользователе.
+payload.user.id|string|ID пользователя.
+items|array|Массив с информацией о предметах.
+items.sku|string|Артикул предмета.
+items.instance_id|string|Уникальный ID предмета в игре.
+payload.secondary_market|object|Объект с информацией о вторичном рынке.
+payload.secondary_market.id|string|ID вторичного рынка.
+
+Примеры получения предметов:
+
+***HTTP***
+```HTTP
+POST /your_uri HTTP/1.1
+Host: your.host
+Content-Type: application/json
+Authorization: Signature sha1(body + project_secret)
+
+{
+    "notification_type": "inventory_push",
+    "project_id": 1024,
+    "payload": {
+        "user": {
+            "id": "username"
+        },
+        "items": [
+            {
+                "sku": "sku1",
+                "instance_id": "instance1"
+            },
+            {
+                "sku": "sku2",
+                "instance_id": "instance2"
+            }
+        ],
+        "secondary_market": {
+            "id": "1"
+        }
+    }
+}
+```
+
+***CURL***
+```CURL
+$ curl -v 'https://your.hostname/your/uri' \
+-X POST \
+-u merchant_id:merchant_api_key \
+-H 'Content-Type: application/json' \
+-d '{
+    "notification_type": "inventory_push",
+    "project_id": 1024,
+    "payload": {
+         "user": {
+             "id": "username"
+              },
+          "items": [
+              {
+                  "sku": "sku1",
+                  "instance_id": "instance1"
+              },
+              {
+                  "sku": "sku2",
+                  "instance_id": "instance2"
+              }
+          ],
+          "secondary_market": {
+               "id": "1"
+          }
+     }  
+}
+```
+
+***PHP***
+```PHP
+<?php
+
+$request = array(
+  'notification_type' => 'inventory_push',
+  'project_id' => 1024,
+  'payload' => array(
+    'user' => array(
+      'id' => 'username'
+    )
+    'items' => array(
+      array(
+        'sku' => 'sku1',
+        'instance_id' => 'instance1'
+      ),
+      array(
+        'sku' => 'sku2',
+        'instance_id' => 'instance2'
+      ),
+    ),
+    'secondary_market' => array(
+      'id' => '1'
+    ),
+  ),
+);
+```
+
+### Оповещения — ошибки
+Коды ошибок:
+
+Код | Описание
+--- | --------
+INVALID_USER|Неверный пользователь.
+INVALID_PARAMETER|Неверный параметр.
+INVALID_SIGNATURE|Невалидная подпись.
+INCORRECT_AMOUNT|Некорректная сумма.
+INCORRECT_INVOICE|Неверный заказ.
+
+Пример ответа: 
+
+```HTTP/1.1 400 Bad Request
+
+{
+    "error":{
+        "code":"INVALID_USER",
+        "message":"Invalid user"
+    }
+} 
+```
+
