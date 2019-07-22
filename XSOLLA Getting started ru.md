@@ -2538,6 +2538,249 @@ $webhookServer = WebhookServer::create($callback, PROJECT_KEY);
 $webhookServer->start();
 ```
 
+### Получение ключа
+XSOLLA отправляет API вызовы к серверу для получения ключа игры после каждого успешного платежа.
+
+Поле | Тип | Описание
+---- | --- | --------
+notification_type|string|Тип оповещения.
+user|object|Объект с информацией о пользователе.
+user.id|string|ID пользователя. Обязательный.
+user.name|string|Имя пользователя.
+pin_code|object|Объект с информацией о ключе.
+pin_code.digital_content|string|Артикул игры.
+pin_code.DRM|string|DRM-платформа, на которой игра будет доступна.
+
+Примеры получения ключа:
+
+***HTTP***
+```HTTP
+ЗАПРОС
+POST /your/uri HTTP/1.1
+Host: your.hostname
+Accept: application/json
+Content-Type: application/json
+Content-Length: 240
+Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
+
+{
+    "notification_type":"get_pincode",
+    "user":{
+        "id":"1234567",
+        "name":"Xsolla User"
+    },
+    "pin_code":{
+        "digital_content":"Game SKU",
+        "DRM":"Steam"
+    }
+}
+ОТВЕТ
+HTTP/1.1 200 OK
+Content-Type: application/json
+{
+    "pin_code": "PIN_CODE"
+}
+```
+
+***CURL***
+```CURL
+ЗАПРОС
+$ curl -v 'https://your.hostname/your/uri' \
+-X POST \
+-H 'Accept: application/json' \
+-H 'Content-Type: application/json' \
+-H 'Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f' \
+-d '{
+        "notification_type":"get_pincode",
+        "user":{
+            "id":"1234567",
+            "name":"Xsolla User"
+        },
+        "pin_code":{
+            "digital_content":"Game SKU",
+            "DRM":"Steam"
+        }
+    }'
+ОТВЕТ
+```
+
+***PHP***
+```PHP
+ЗАПРОС
+<?php
+
+$request = array (
+       'notification_type' => 'get_pincode',
+       'user' =>
+           array (
+               'id' => '1234567',
+               'name' => 'Xsolla User',
+           ),
+       'pin_code' =>
+           array (
+               'digital_content' => 'Game SKU',
+               'DRM' => 'Steam',
+           ),
+   );
+ОТВЕТ
+<?php
+
+use Xsolla\SDK\Webhook\WebhookServer;
+use Xsolla\SDK\Webhook\Message\Message;
+use Xsolla\SDK\Exception\Webhook\XsollaWebhookException;
+
+$callback = function (Message $message) {
+    if ($message instanceof GetPinCodeMessage) {
+        $userArray = $message->getUser();
+        $drmSku = $message->getDRM();
+        $digitalContentSku = $message->getDigitalContent();
+        // TODO get a pin code from your database or generate a new one. Put the pin code into variable $newPinCode
+        $newPinCode = 'NEW_PIN_CODE';
+        // TODO if the pin code creation or generation fail for some reason, you should throw XsollaWebhookException
+        return new \Xsolla\SDK\Webhook\Response\PinCodeResponse($newPinCode);
+    }
+};
+$webhookServer = WebhookServer::create($callback, PROJECT_KEY);
+$webhookServer->start();
+```
+
+### Активация ключа
+Когда пользователь активирует ключ, XSOLLA присылает оповещение на webhook URL.
+
+Поле | Тип | Описание
+---- | --- | --------
+notification_type|string|Тип оповещения.
+key|string|Ключ активации.
+sku|string|Уникальный ID пакета ключей.
+user_id|string|ID пользователя.
+activation_date|datetime|Дата активации ключа в формате ГГГГММДДЧЧММСС согласно стандарту ISO 8601.
+user_country|string|Двухбуквенное обозначение страны пользователя согласно стандарту ISO 3166-1 alpha-2.
+restriction|object|Объект с настройками кластера регионального ограничения. Кластер включает в себя тип ограничения, список стран, серверов и языковых версий, для которых доступна игра.
+restriction.sku|string|Уникальный ID кластера.
+restriction.name|string|Имя кластера.
+restriction.types|array|Массив типов ограничений.
+restriction_countries|array|Массив стран, входящих в кластер.
+restriction.servers|array|Массив серверов игры.
+restriction.locales|array|Массив языковых версий игры.
+
+Примеры активации ключа:
+
+***HTTP***
+```HTTP
+ЗАПРОС
+POST /your_uri HTTP/1.1
+Host: your.host
+Accept: application/json
+Content-Type: application/json
+Content-Length: 165
+Authorization: Signature 52eac2713985e212351610d008e7e14fae46f902
+
+{
+  "notification_type": "redeem_key",
+  "key": "wqdqwwddq9099022",
+  "sku": "123",
+  "user_id": "sample_user",
+  "activation_date": "2018-11-20T08:38:51+03:00",
+  "user_country": "EN",
+  "restriction": {
+      "name": "cls_1",
+      "types": [
+           "activation"
+        ],
+        "countries": [
+             "RU"
+        ]
+  }
+}
+ОТВЕТ
+HTTP/1.1 204 No Content
+```
+
+***CURL***
+```CURL
+ЗАПРОС
+$ curl -v 'https://your.hostname/your/uri' \
+-X POST \
+-H 'Accept: application/json' \
+-H 'Content-Type: application/json' \
+-H 'Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f' \
+-d '{
+     "notification_type": "redeem_key",
+  "key": "wqdqwwddq9099022",
+  "sku": "123",
+  "user_id": "sample_user",
+  "activation_date": "2018-11-20T08:38:51+03:00",
+  "user_country": "EN",
+  "restriction": {
+      "name": "cls_1",
+      "types": [
+           "activation"
+        ],
+        "countries": [
+             "RU"
+         ]
+    }
+}'
+ОТВЕТ
+```
+
+***PHP***
+```PHP
+ЗАПРОС
+<?php
+$request = array(
+    'notification_type' => 'redeem_key',
+    'key' => ‘wqdqwwddq9099022’,
+    'sku' => 123,
+    'user_id' => ‘sample_user’,
+    'activation_date' => ‘2018-11-20T08:38:51+03:00’,
+    'user_country' => ‘EN’,
+    'restriction' =>
+           array(
+                'name' => ‘cls_1’,
+                'types' =>
+                        array(
+                            ‘activation’
+                        ),
+                'countries' =>
+                        array(
+                            ‘RU’
+                        ),
+             ),
+);  
+ОТВЕТ
+<?php
+
+$response = null;
+```
+
+### Получение списка друзей
+API должен быть реализован на стороне партнера. Максимальный размер списка друзей — 2000. Подробнее можно узнать в [рецепте](https://developers.xsolla.com/ru/recipes/store/gifting/).
+
+HTTP-ЗАПРОС
+
+```
+GET https://your.webhook.url?notification_type=friends_list&user=user_id&query=frien&offset=10&limit=20&sign=12dfg3f5gdsf4g5s6dfg2sdg1
+notification_type
+```
+
+Поле | Тип | Описание
+---- | --- | --------
+string|friends_list|Идентификатор , определяющий тип запрос на список друзей.
+user|string|Уникальный идентификатор пользователя, который делает покупку другу.
+query|string|Имя или идентификатор друга. Может передавать часть имени или идентификатора друга.
+limit|string|Лимит количества элементов на странице. Обязательный.
+offset|integer|Номер элемента, c которого выполняется вывод на странице (нумерация ведется с 0).
+sign|string|Строка для подписи формируется следующим образом:
+<ul><li>notification_type + значения параметров, отсортированных по ключу в алфавитном порядке + secret_key
+</li><li>Второй шаг — применение SHA-1 криптографической хэш-функции к получившейся на первом шаге строке.</li><li>
+
+
+
+
+
+
+
 
 
 
