@@ -425,7 +425,7 @@ purchase.gift.giver_id|string|ID of the donor.
 purchase.gift.message|string|Message from the giver.
 purchase.gift.hide_giver_from_receiver|string|data Visibility of the gift giver to the gift recipient. Default is 'true'.
 purchase.gift.friends|array|Array with data about friends.
-purchase.gift.friends.id/string/ID the gift recipient.
+purchase.gift.friends.id|string|ID the gift recipient.
 purchase.gift.friends.name|string|the Nickname of the gift recipient.
 purchase.gift.friends.email|string|Email of the gift recipient.
 purchase.coupon_code|object|Object with information about the promotional code for a discount or bonuses when buying.
@@ -945,7 +945,7 @@ Field | Type | Description
 notification_type|string|alert Type. Obligatory.
 user|object|Object with user information. Obligatory.
 user.public_id|string|Public user ID.
-user.id/string/ID user.
+user.id|string|ID user.
 
 User search examples: 
 
@@ -1106,8 +1106,8 @@ user|object|Object with user information.
 user.ip|string|IP address of the user.
 user.phone|string|user's phone Number (in international format).
 user.email|string|Email of the user.
-user.id/string/ID user. Obligatory.
-user.name/string/Имя user.
+user.id|string|ID user. Obligatory.
+user.name|string|User name.
 user.country|string|two-Letter designation of the user's country according to ISO 3166-1 alpha-2.
 user.zip|string|zip or Postal code.
 transaction|object|Object with information about the transaction associated with this operation. Obligatory.
@@ -2070,8 +2070,8 @@ user|object|Object with user information.
 user.ip|string|IP address of the user.
 user.phone|string|user's phone Number (in international format).
 user.email|string|Email of the user.
-user.id/string/ID user. Obligatory.
-user.name/string/Имя user.
+user.id|string|ID user. Obligatory.
+user.name|string|User name.
 user.country|string|two-Letter designation of the user's country according to ISO 3166-1 alpha-2.
 user.zip|string|zip or Postal code.
 transaction|object|Object with information about the transaction associated with this operation. Obligatory.
@@ -2207,8 +2207,8 @@ Field | Type | Description
 ---- | --- | --------
 notification_type|string|alert Type. Obligatory.
 user|object|Object with user information.
-user.id/string/ID user. Obligatory.
-user.name/string/Имя user.
+user.id|string|ID user. Obligatory.
+user.name|string|User name.
 subscription|object|Object with subscription data.
 subscription.plan_id|string|the ID of the plan (external id if the plan was created through the API).
 subscription.tags|array|plan Tags.
@@ -2331,8 +2331,8 @@ Field | Type | Description
 ---- | --- | --------
 notification_type|string|alert Type. Obligatory.
 user|object|Object with user information.
-user.id/string/ID user. Obligatory.
-user.name/string/Имя user.
+user.id|string|ID user. Obligatory.
+user.name|string|User name.
 subscription|object|Object with subscription data.
 subscription.plan_id|string|the ID of the plan (external id if the plan was created through the API).
 subscription.tags|array|plan Tags.
@@ -2436,8 +2436,8 @@ Field | Type | Description
 ---- | --- | --------
 notification_type|string|alert Type. Obligatory.
 user|object|Object with user information.
-user.id/string/ID user. Obligatory.
-user.name/string/Имя user.
+user.id|string|ID user. Obligatory.
+user.name|string|User name.
 subscription|object|Object with subscription data.
 subscription.plan_id|string|the ID of the plan (external id if the plan was created through the API).
 subscription.tags|array|plan Tags.
@@ -2545,8 +2545,8 @@ Field | Type | Description
 ---- | --- | --------
 notification_type|string|alert Type.
 user|object|Object with user information.
-user.id/string/ID user. Obligatory.
-user.name/string/Имя user.
+user.id|string|ID user. Obligatory.
+user.name|string|User name.
 pin_code|object|Object with key information.
 pin_code.digital_content|string|article of the game.
 pin_code.DRM|string|DRM is the platform on which the game will be available.
@@ -2857,8 +2857,8 @@ notification_type|string|alert Type.
 operation_type|string|the Type of operation.
 id_operation|integer|ID of the operation in the XSOLLA database.
 user|object|Object with user information.
-user.id/string/ID user. Obligatory.
-user.name/string/Имя user.
+user.id|string|ID user. Obligatory.
+user.name|string|User name.
 user.email|string|Email of the user.
 virtual_currency_balance|object|Object with user balance data.
 virtual_currency_balance.old_value|string|the Value of balance before the transaction.
@@ -2984,8 +2984,8 @@ notification_type|string|alert Type.
 operation_type|string|the Type of operation.
 id_operation|integer|ID of the operation in the XSOLLA database.
 user|object|Object with user information.
-user.id/string/ID user. Obligatory.
-user.name/string/Имя user.
+user.id|string|ID user. Obligatory.
+user.name|string|User name.
 user.email|string|Email of the user.
 virtual_currency_balance|object|Object with user balance data.
 virtual_currency_balance.old_value|string|the Value of balance before the transaction.
@@ -3115,8 +3115,8 @@ notification_type|string|alert Type.
 operation_type|string|the Type of operation.
 id_operation|integer|ID of the operation in the XSOLLA database.
 user|object|Object with user information.
-user.id/string/ID user. Obligatory.
-user.name/string/Имя user.
+user.id|string|ID user. Obligatory.
+user.name|string|User name.
 user.email|string|Email of the user.
 virtual_currency_balance|object|Object with user balance data.
 virtual_currency_balance.old_value|string|the Value of balance before the transaction.
@@ -3261,8 +3261,8 @@ notification_type|string|alert Type.
 operation_type|string|the Type of operation.
 id_operation|integer|ID of the operation in the XSOLLA database.
 user|object|Object with user information.
-user.id/string/ID user. Obligatory.
-user.name/string/Имя user.
+user.id|string|ID user. Obligatory.
+user.name|string|User name.
 user.email|string|Email of the user.
 virtual_currency_balance|object|Object with user balance data.
 virtual_currency_balance.old_value|string|the Value of balance before the transaction.
@@ -3356,8 +3356,8 @@ notification_type|string|alert Type.
 operation_type|string|the Type of operation.
 id_operation|integer|ID of the operation in the XSOLLA database.
 user|object|Object with user information.
-user.id/string/ID user. Obligatory.
-user.name/string/Имя user.
+user.id|string|ID user. Obligatory.
+user.name|string|User name.
 user.email|string|Email of the user.
 virtual_currency_balance|object|Object with user balance data.
 virtual_currency_balance.old_value|string|the Value of balance before the transaction.
@@ -3555,7 +3555,7 @@ notification_type|string|alert Type.
 project_id|integer|ID of the project.
 payload|object|Object with information about the user and the secondary market.
 payload.user|object|Object with user information.
-payload.user.id/string/ID user.
+payload.user.id|string|ID user.
 items|array|Array with information about items.
 items.sku|string|item number.
 items.instance_id|string|Unique in-game item ID.
