@@ -25,7 +25,7 @@ The XSOLLA API works with the following base URLs:
 Requests to XSOLLA APi:
 * Sent via the HTTP Protocol.
 * Use [TLS](https://habr.com/ru/post/258285/) version 1.2 and above.
-* Must contain the authentication parameters (see section [Autentificate](#Autentificate)).
+* Must contain the authentication parameters (see section [Authentication](#Authentication)).
 * For requests of type *PUT* and *POST* must contain additional header `Content-Type: application/json`.
 
 Example:
