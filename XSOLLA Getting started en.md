@@ -125,17 +125,17 @@ Examples:
 GET https://api.xsolla.com/merchant/v2/merchants/{merchant_id}/events/messages
 Headers:
   Authorization: Basic <your_authorization_basic_key>
-``
+```
 
 ***CURL***
-``CURL
+```CURL
 curl --request GET \
 --url 'https://api.xsolla.com/merchant/v2/merchants/{merchant_id}/events/messages' \
 --header 'authorization: Basic <your_authorization_basic_key>'
-``
+```
 
 ***PHP***
-``PHP
+```PHP
 <?php
 
 // if you use Xsolla SDK for PHP
@@ -160,18 +160,18 @@ $client->enqueue($request)->send();
 $response = $client->getResponse();
 
 echo $response->getBody();
-``
+```
 
 ***C#***
-``C#
+```C#
 var client = new RestClient("https://api.xsolla.com/merchant/v2/merchants/{merchant_id}/events/messages");
 var request = new RestRequest(Method.GET);
 request.AddHeader("authorization", "Basic <your_authorization_basic_key>)");
 IRestResponse response = client.Execute(request);
-``
+```
 
 ***PYTHON***
-``PYTHON
+```PYTHON
 import http.client
 
 conn = http.client.HTTPSConnection("api.xsolla.com")
@@ -182,10 +182,10 @@ conn.request("GET", "/merchant/v2/merchants/{merchant_id}/events/messages", head
 
 res = conn.getresponse()
 data = res.read()
-``
+```
 
 ***RUBY***
-``RUBY
+```RUBY
 require 'uri'
 require 'net/http'
 
@@ -200,10 +200,10 @@ request["authorization"] = 'Basic <your_authorization_basic_key>'
 
 response = http.request(request)
 puts response.read_body
-``
+```
 
 ***JAVA***
-``JAVA
+```JAVA
 OkHttpClient client = new OkHttpClient();
 
 Request request = new Request.Builder()
@@ -213,10 +213,10 @@ Request request = new Request.Builder()
   .build();
 
 Response = client.newCall(request).execute();
-``
+```
 
 ***JS***
-``JS
+```JS
 var data = null;
 
 var xhr = new XMLHttpRequest();
@@ -231,7 +231,7 @@ xhr.open("GET", "https://api.xsolla.com/merchant/v2/merchants/{merchant_id}/even
 xhr.setRequestHeader("authorization", "Basic <your_authorization_basic_key>)");
 
 xhr.send(data);
-``
+```
 
 ## Resource management commands
 All XSOLLA API commands point to the type of data to be processed and the action to be taken with that data. Standard action list:
@@ -275,14 +275,14 @@ extended_message | string | Extended error description
 request_id | string | Unique request ID, used to help XSOLLA developers diagnose the problem
 
 Example of JSON object with error:
-``
+```
 {
     "http_status_code": Five hundred,
     "message": "Internal Server Error",
     "extended_message": null,
     "request_id": "6445b85"
 }
-``
+```
 
 ## Token
 To ensure the security of the payment, the XSOLLA API uses a token that contains payment parameters inside itself, instead of directly receiving data via HTTP GET request to the payment page. Before opening the payment page, you need to get a new token. Token lifetime is 24 hours.
@@ -436,7 +436,7 @@ custom_parameters|object|Additional parameters sent in the JSON hash of pairs ke
 If any parameter was passed in an incorrect format, the token cannot be issued. 422 HTTP code will be returned, the JSON object in the body of the response will contain information about the error. The "extended_message" parameter specifies which parameters were passed incorrectly.
 
 Example of JSON object with error:
-``
+```
 {
     "extended_message": {
         "global_errors": [],
@@ -447,7 +447,7 @@ Example of JSON object with error:
         }
     }
 }
-``
+```
 Sample requests and responses:
 
 ***HTTP***
@@ -513,10 +513,10 @@ ANSWER
 {
   "token": "eop57k1boA7nnYPtewZ6KEXJyJADEwRT"
 }
-``
+```
 
 ***CURL***
-``CURL
+```CURL
 REQUEST
 curl --request POST \
   --url https://api.xsolla.com/merchant/v2/merchants/{merchant_id}/token \
@@ -527,10 +527,10 @@ ANSWER
 {
   "token": "eop57k1boA7nnYPtewZ6KEXJyJADEwRT"
 }
-``
+```
 
 ***PHP***
-``PHP
+```PHP
 <?php
 
 $client = new http\Client;
@@ -556,10 +556,10 @@ ANSWER
 {
   "token": "eop57k1boA7nnYPtewZ6KEXJyJADEwRT"
 }
-``
+```
 
 ***C#***
-``C#
+```C#
 REQUEST
 var client = new RestClient("https://api.xsolla.com/merchant/v2/merchants/{merchant_id}/token");
 var request = new RestRequest(Method.POST);
@@ -571,10 +571,10 @@ ANSWER
 {
   "token": "eop57k1boA7nnYPtewZ6KEXJyJADEwRT"
 }
-``
+```
 
 ***PYTHON***
-``PYTHON
+```PYTHON
 REQUEST
 import http.client
 
@@ -597,10 +597,10 @@ ANSWER
 {
   "token": "eop57k1boA7nnYPtewZ6KEXJyJADEwRT"
 }
-``
+```
 
 ***RUBY***
-``RUBY
+```RUBY
 REQUEST
 require 'uri'
 require 'net/http'
@@ -622,10 +622,10 @@ ANSWER
 {
   "token": "eop57k1boA7nnYPtewZ6KEXJyJADEwRT"
 }
-``
+```
 
 ***JAVA***
-``JAVA
+```JAVA
 REQUEST
 OkHttpClient client = new OkHttpClient();
 
@@ -643,10 +643,10 @@ ANSWER
 {
   "token": "eop57k1boA7nnYPtewZ6KEXJyJADEwRT"
 }
-``
+```
 
 ***JS***
-``JS
+```JS
 REQUEST
 var data = JSON.stringify({
   "user": {
@@ -716,7 +716,7 @@ ANSWER
 {
   "token": "eop57k1boA7nnYPtewZ6KEXJyJADEwRT"
 }
-``
+```
 
 ### List of additional parameters
 
@@ -806,16 +806,16 @@ Content-Length: One hundred sixty five
 Authorization: Signature 52eac2713985e212351610d008e7e14fae46f902
 
 {"notification_type":"user_validation","user":{"ip":"127.0.0.1","phone":"18777976552","email":"email@example.com","id":1234567,"name":"Xsolla User","country":"US"}}
-``
+```
 
 ***CURL***
-``CURL
+```CURL
 REQUEST
 $curl -v 'https://your ahhh!hostname/your/uri' \
 -X POST \
 -H 'Authorization: Signature 52eac2713985e212351610d008e7e14fae46f902' \
 -d '{"notification_type":"user_validation","user":{"ip":"127.0.0.1","phone":"18777976552","email":"email@example.com","id":1234567,"name":"Xsolla User","country":"US"}}'
-``
+```
 
 XSOLLA uses HTTP response codes to indicate a successful or failed request. Code 204 indicates successful processing of the alert. If an error occurs, you must return the code 400 (for example, there is no mandatory parameter, or the balance can not be replenished). The code 500 indicates a temporary server error.
 
@@ -878,10 +878,10 @@ Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
 }
 ANSWER
 HTTP/1.1 204 No Content
-``
+```
 
 ***CURL***
-``CURL
+```CURL
 REQUEST
 $ curl -v 'https://your ahhh!hostname/your/uri' \
 -X POST \
@@ -900,10 +900,10 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
     }
 }'
 ANSWER
-``
+```
 
 ***PHP***
-``PHP
+```PHP
 REQUEST
 <?php
 
@@ -935,7 +935,7 @@ $callback = function (Message $message) {
 
 $webhookServer = WebhookServer::create($callback, PROJECT_KEY);
 $webhookServer->start();
-``
+```
 
 ### User search
 Public User ID — a parameter that can uniquely identify the user and which is well known to the user in contrast to the User ID (as Public User ID can be email, nickname, etc.). This webhook is used when it is possible to make a payment outside the game (for example, when paying for the game button in the terminal).
@@ -978,10 +978,10 @@ Content-Type: application/json
         "name": "Xsolla User"
     }
 }
-``
+```
 
 ***CURL***
-``CURL
+```CURL
 REQUEST
 $ curl -v 'https://your ahhh!hostname/your/uri' \
 -X POST \
@@ -1004,10 +1004,10 @@ ANSWER
         "name": "Xsolla User"
     }
 }
-``
+```
 
 ***PHP***
-``PHP
+```PHP
 REQUEST
 <?php
 
@@ -1040,7 +1040,7 @@ $callback = function (Message $message) {
 };
 $webhookServer = WebhookServer::create($callback, PROJECT_KEY);
 $webhookServer->start();
-``
+```
 
 ### Successful payment
 When the user successfully makes the payment, XSOLLA sends the payment details to the webhook URL.
@@ -1256,10 +1256,10 @@ Authorization: Signature 34553d151e656110c656696c919f9a10e05de542
 }
 ANSWER
 HTTP/1.1 204 No Content
-``
+```
 
 ***CURL***
-``CURL
+```CURL
 REQUEST
 $curl -v 'https://your ahhh!hostname/your/uri' \
 -X POST \
@@ -1358,10 +1358,10 @@ $curl -v 'https://your ahhh!hostname/your/uri' \
     }
 }'
 ANSWER
-``
+```
 
 ***PHP***
-``PHP
+```PHP
 REQUEST
 <?php
 
@@ -1443,7 +1443,7 @@ $callback = function (Message $message) {
 
 $webhookServer = WebhookServer::create($callback, PROJECT_KEY);
 $webhookServer->start();
-``
+```
 
 ### The payment was canceled
 When you cancel a payment, XSOLLA sends the details of the canceled transaction to the webhook URL.
@@ -1490,8 +1490,8 @@ user|object|Object with user information.
 user.ip|string|IP address of the user.
 user.phone|string|user's phone Number (in international format).
 user.email|string|Email of the user.
-user.id/string/ID user. Obligatory.
-user.name/string/Имя user.
+user.id|string|User ID. Obligatory.
+user.name|string|User name.
 user.country|string|two-Letter designation of the user's country according to ISO 3166-1 alpha-2.
 user.zip|string|zip or Postal code.
 transaction|object|Object with information about the transaction associated with this operation. Obligatory.
@@ -1641,10 +1641,10 @@ Authorization: Signature 31bd5924dd6cbc9cbe99d331c4a086a57291f9d7
 }
 ANSWER
 HTTP/1.1 204 No Content
-``
+```
 
 ***CURL***
-``CURL
+```CURL
 REQUEST
 $ curl -v 'https://your ahhh!hostname/your/uri' \
 -X POST \
@@ -1726,10 +1726,10 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
     }
 }'
 ANSWER
-``
+```
 
 ***PHP***
-``PHP
+```PHP
 REQUEST
 <?php
 
@@ -1816,13 +1816,13 @@ $callback = function (Message $message) {
 
 $webhookServer = WebhookServer::create($callback, PROJECT_KEY);
 $webhookServer->start();
-``
+```
 
 ### Cancel the upgrade
 If the user cancels the payment associated with the upgrade, XSOLLA sends the canceled upgrades and the current package data to the webhook URL.
 
 Field | Type | Description
----- | --- | --------
+----- | ---- | -----------
 notification_type|string|alert Type. Obligatory.
 purchase|object|Object with purchase information. Obligatory.
 purchase.pin_codes|object|Object with information about the purchased packages of the game.
@@ -1913,10 +1913,10 @@ Authorization: Signature <signature>
   }
 }
 ANSWER
-``
+```
 
 ***CURL***
-``CURL
+```CURL
 REQUEST
 $ curl -v 'https://your ahhh!hostname/your/uri' \
 -X POST \
@@ -1978,10 +1978,10 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
   }
 }'
 ANSWER
-``
+```
 
 ***PHP***
-``PHP
+```PHP
 REQUEST
 <?php
 
@@ -2058,7 +2058,7 @@ $request = array (
   ),
 )
 ANSWER
-``
+```
 
 ### The transaction is declined when checking AFS
 If the transaction was rejected during AFS validation, XSOLLA sends the transaction details to the webhook URL. To enable the alert, you need to contact the account Manager of the project.
@@ -2119,10 +2119,10 @@ Authorization: Signature 31bd5924dd6cbc9cbe99d331c4a086a57291f9d7
 }
 ANSWER
 HTTP/1.1 204 No Content
-``
+```
 
 ***CURL***
-``CURL
+```CURL
 REQUEST
 $ curl -v 'https://your ahhh!hostname/your/uri' \
 -X POST \
@@ -2148,10 +2148,10 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
   }
 }'
 ANSWER
-``
+```
 
 ***PHP***
-``PHP
+```PHP
 REQUEST
 <?php
 
@@ -2198,7 +2198,7 @@ $callback = function (Message $message) {
 
 $webhookServer = WebhookServer::create($callback, PROJECT_KEY);
 $webhookServer->start();
-``
+```
 
 ### Create subscription
 When a user creates a subscription, XSOLLA sends an alert to the webhook URL.
@@ -2252,10 +2252,10 @@ Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
 }
 ANSWER
 HTTP/1.1 204 No Content
-``
+```
 
 ***CURL***
-``CURL
+```CURL
 REQUEST
 $ curl -v 'https://your ahhh!hostname/your/uri' \
 -X POST \
@@ -2281,10 +2281,10 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
         }
     }'
 ANSWER
-``
+```
 
 ***PHP***
-``PHP
+```PHP
 REQUEST
 <?php
 
@@ -2322,7 +2322,7 @@ $callback = function (Message $message) {
 
 $webhookServer = WebhookServer::create($callback, PROJECT_KEY);
 $webhookServer->start();
-``
+```
 
 ### Change subscription
 In case of change of any parameters ('plan_id', 'date_next_charge') subscriptions and for each subscription renewal, XSOLLA sends an alert "update_subscription" in the webhook URL.
@@ -2367,10 +2367,10 @@ Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
 }
 ANSWER
 HTTP/1.1 204 No Content
-``
+```
 
 ***CURL***
-``CURL
+```CURL
 REQUEST
 $ curl -v 'https://your ahhh!hostname/your/uri' \
 -X POST \
@@ -2391,10 +2391,10 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
         }
     }'
 ANSWER
-``
+```
 
 ***PHP***
-``PHP
+```PHP
 REQUEST
 <?php
 
@@ -2427,7 +2427,7 @@ $callback = function (Message $message) {
 
 $webhookServer = WebhookServer::create($callback, PROJECT_KEY);
 $webhookServer->start();
-``
+```
 
 ### Unsubscribe
 When a subscription is cancelled for any reason, XSOLLA sends an alert to the webhook URL.
@@ -2474,10 +2474,10 @@ Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
 }
 ANSWER
 HTTP/1.1 204 No Content
-``
+```
 
 ***CURL***
-``CURL
+```CURL
 REQUEST
 $ curl -v 'https://your ahhh!hostname/your/uri' \
 -X POST \
@@ -2499,10 +2499,10 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
         }
     }'
 ANSWER
-``
+```
 
 ***PHP***
-``PHP
+```PHP
 REQUEST
 <?php
 
@@ -2536,7 +2536,7 @@ $callback = function (Message $message) {
 
 $webhookServer = WebhookServer::create($callback, PROJECT_KEY);
 $webhookServer->start();
-``
+```
 
 ### Get key
 XSOLLA sends API calls to the server to retrieve the game key after each successful payment.
@@ -2580,10 +2580,10 @@ Content-Type: application/json
 {
     "pin_code": "PIN_CODE"
 }
-``
+```
 
 ***CURL***
-``CURL
+```CURL
 REQUEST
 $ curl -v 'https://your ahhh!hostname/your/uri' \
 -X POST \
@@ -2602,10 +2602,10 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
         }
     }'
 ANSWER
-``
+```
 
 ***PHP***
-``PHP
+```PHP
 REQUEST
 <?php
 
@@ -2642,7 +2642,7 @@ $callback = function (Message $message) {
 };
 $webhookServer = WebhookServer::create($callback, PROJECT_KEY);
 $webhookServer->start();
-``
+```
 
 ### Key activation
 When the user activates the key, XSOLLA sends an alert to the webhook URL.
@@ -2694,10 +2694,10 @@ Authorization: Signature 52eac2713985e212351610d008e7e14fae46f902
 }
 ANSWER
 HTTP/1.1 204 No Content
-``
+```
 
 ***CURL***
-``CURL
+```CURL
 REQUEST
 $ curl -v 'https://your ahhh!hostname/your/uri' \
 -X POST \
@@ -2722,10 +2722,10 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
     }
 }'
 ANSWER
-``
+```
 
 ***PHP***
-``PHP
+```PHP
 REQUEST
 <?php
 $request = array(
@@ -2752,17 +2752,17 @@ ANSWER
 <?php
 
 $response = null;
-``
+```
 
 ### Get your friends list
 The API must be implemented on the partner side. The maximum size of a friend list is 2000. More details can be found in [recipe](https://developers.xsolla.com/ru/recipes/store/gifting/).
 
 THE HTTP REQUEST
 
-``
+```
 GET https://your.webhook.url?notification_type=friends_list&user=user_id&query=frien&offset=10&limit=20&sign=12dfg3f5gdsf4g5s6dfg2sdg1
 notification_type
-``
+```
 
 Field | Type | Description
 ---- | --- | --------
@@ -2818,10 +2818,10 @@ Content-Type: application/json
     "total": Ten
   }
 ]
-``
+```
 
 ***CURL***
-``CURL
+```CURL
 REQUEST
 $ curl -v 'https://your ahhh!webhook.url?notification_type=friends_list&user=user_id&query=frien&offset=10&limit=20&sign=12dfg3f5gdsf4g5s6dfg2sdg1' \
 -X GET \
@@ -2846,7 +2846,7 @@ ANSWER
   "total": Ten
   }
 ]
-``
+```
 
 ### The user's balance: internal operation
 When a user makes a payment, XSOLLA sends a special notification about the change in the user's balance.
@@ -2901,10 +2901,10 @@ Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
 }
 ANSWER
 HTTP/1.1 204 No Content
-``
+```
 
 ***CURL***
-``CURL
+```CURL
 REQUEST
 $ curl -v 'https://your ahhh!hostname/your/uri' \
 -X POST \
@@ -2931,10 +2931,10 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
         "id_operation":"66989"
     }'
 ANSWER
-``
+```
 
 ***PHP***
-``PHP
+```PHP
 REQUEST
 <?php
 
@@ -2973,7 +2973,7 @@ $callback = function (Message $message) {
 
 $webhookServer = WebhookServer::create($callback, PROJECT_KEY);
 $webhookServer->start();
-``
+```
 
 ### The user's balance: in-game purchase
 When a user makes a purchase in the game (for example, buying items), XSOLLA sends a special notification about the change in the user's balance.
@@ -3030,10 +3030,10 @@ Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
 }
 ANSWER
 HTTP/1.1 204 No Content
-``
+```
 
 ***CURL***
-``CURL
+```CURL
 REQUEST
 $ curl -v 'https://your ahhh!hostname/your/uri' \
 -X POST \
@@ -3061,10 +3061,10 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
         "id_operation":"66989"
     }'
 ANSWER
-``
+```
 
 ***PHP***
-``PHP
+```PHP
 REQUEST
 <?php
 
@@ -3104,7 +3104,7 @@ $callback = function (Message $message) {
 
 $webhookServer = WebhookServer::create($callback, PROJECT_KEY);
 $webhookServer->start();
-``
+```
 
 ### The user's balance: coupon activation
 If the user has activated the coupon to receive items or virtual currency in the game, XSOLLA sends a special notification about the change in the user's balance.
@@ -3168,10 +3168,10 @@ Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
 }
 ANSWER
 HTTP/1.1 204 No Content
-``
+```
 
 ***CURL***
-``CURL
+```CURL
 REQUEST
 $ curl -v 'https://your ahhh!hostname/your/uri' \
 -X POST \
@@ -3203,10 +3203,10 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
         }
     }'
 ANSWER
-``
+```
 
 ***PHP***
-``PHP
+```PHP
 REQUEST
 <?php
 
@@ -3250,7 +3250,7 @@ $callback = function (Message $message) {
 
 $webhookServer = WebhookServer::create($callback, PROJECT_KEY);
 $webhookServer->start();
-``
+```
 
 ### The user's balance: manual change
 If you want to change the user's balance manually, you can use the "Internal"operation type.
@@ -3298,10 +3298,10 @@ Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
 }
 ANSWER
 HTTP/1.1 204 No Content
-``
+```
 
 ***CURL***
-``CURL
+```CURL
 REQUEST
 $ curl -v 'https://your ahhh!hostname/your/uri' \
 -X POST \
@@ -3324,10 +3324,10 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
         "id_operation":"67002"
     }'
 ANSWER
-``
+```
 
 ***PHP***
-``PHP
+```PHP
 <?php
 
 $request = array(
@@ -3345,7 +3345,7 @@ $request = array(
     'notification_type' => 'user_balance_operation',
     'id_operation' => '67002'
 );
-``
+```
 
 ### The user's balance: payment cancellation
 When a user cancels a payment, XSOLLA sends a special notification when the user's balance changes.
@@ -3406,10 +3406,10 @@ Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
          }],
     "id_operation":"66989"
 }
-``
+```
 
 ***CURL***
-``CURL
+```CURL
 $ curl -v 'https://your ahhh!hostname/your/uri' \
 -X POST \
 -H 'Accept: application/json' \
@@ -3442,7 +3442,7 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
 ``
 
 ***PHP***
-``PHP
+```PHP
 <?php
 
 $request = array(
@@ -3469,7 +3469,7 @@ $request = array(
          ),
      'id_operation' => '66989'
 );
-``
+```
 
 ### Secondary market: send list of items
 When the secondary market requests data about items from the game inventory, XSOLLA sends an alert to the webhook URL.
@@ -3505,10 +3505,10 @@ Authorization: Signature sha1(body + project_secret)
           }
      }  
 }
-``
+```
 
 ***CURL***
-``CURL
+```CURL
 $ curl -v 'https://your ahhh!hostname/your/uri' \
 -X POST \
 -u merchant_id:merchant_api_key \
@@ -3528,7 +3528,7 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
 ``
 
 ***PHP***
-``PHP
+```PHP
 <?php
 
 $request = array(
@@ -3543,7 +3543,7 @@ $request = array(
    ),
  ),
 );
-``
+```
 
 ### Secondary market: sending items from the game
 When the secondary market requests items from the game's inventory, XSOLLA sends an alert to the webhook URL.
@@ -3596,7 +3596,7 @@ Authorization: Signature sha1(body + project_secret)
 ``
 
 ***CURL***
-``CURL
+```CURL
 $ curl -v 'https://your ahhh!hostname/your/uri' \
 -X POST \
 -u merchant_id:merchant_api_key \
@@ -3623,10 +3623,10 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
           }
      }  
 }
-``
+```
 
 ***PHP***
-``PHP
+```PHP
 <?php
 
 $request = array(
@@ -3651,7 +3651,7 @@ $request = array(
     ),
   ),
 );
-``
+```
 
 ### Secondary market: getting items into the game
 When the secondary market sends items to the game inventory, XSOLLA sends an alert to the webhook URL.
@@ -3703,7 +3703,7 @@ Authorization: Signature sha1(body + project_secret)
 ``
 
 ***CURL***
-``CURL
+```CURL
 $ curl -v 'https://your ahhh!hostname/your/uri' \
 -X POST \
 -u merchant_id:merchant_api_key \
@@ -3733,7 +3733,7 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
 ``
 
 ***PHP***
-``PHP
+```PHP
 <?php
 
 $request = array(
@@ -3758,7 +3758,7 @@ $request = array(
     ),
   ),
 );
-``
+```
 
 ### Error alerts
 Error code:
@@ -3773,7 +3773,7 @@ INCORRECT_INVOICE|Wrong order.
 
 Response example: 
 
-``HTTP/1.1 400 Bad Request
+```HTTP/1.1 400 Bad Request
 
 {
     "error":{
@@ -3781,5 +3781,5 @@ Response example:
         "message":"Invalid user"
     }
 } 
-``
+```
 
