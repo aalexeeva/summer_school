@@ -1,17 +1,18 @@
-# Getting started with XSOLLA API 
+﻿# Getting started with XSOLLA API 
 ## Introduction
 ### The composition of the XSOLLA API
-XSOLLA API includes:
+The XSOLLA API includes:
 * [**Pay Station API**](https://developers.xsolla.com/ru/api/v2/pay-station/) — payment interface and tokenization methods;
 * [**Store API**](https://developers.xsolla.com/ru/api/v2/store/) — methods for working with such store modules as *Virtual currency*, *Virtual items*, *Subscriptions*, *Game keys*, *Promotions*, *Coupons*;
 * [**Publisher Account API**](https://developers.xsolla.com/ru/api/v2/publisher-account/) — management of projects and users of the Personal account, methods for working with reports, support tickets;
-* [**API Login**](https://developers.xsolla.com/ru/api/v2/login/) — methods of authenticating users through a native interface. More information can be found in [integration guide](https://developers.xsolla.com/ru/doc/login/#guides_login_api_integration).
+* [**API Login**](https://developers.xsolla.com/ru/api/v2/login/) — methods of authenticating users through a native interface. More information can be found in the [integration guide](https://developers.xsolla.com/ru/doc/login/#guides_login_api_integration).
 ### Basic information
-XSOLLA API is based on the principles of [REST-architecture](https://en.wikipedia.org/wiki/Representational_state_transfer). HTTP response codes are used to indicate errors and URL similar to the directory structure. API responses and error information are returned as JSON.
+The XSOLLA API is based on the principles of [REST-architecture](https://en.wikipedia.org/wiki/Representational_state_transfer). HTTP response codes are used to indicate errors and URLs similar to the directory structure. API responses and error information are returned as JSON.
 
 The API uses built-in HTTP features, such as HTTP authentication and HTTP methods, which are understood by all HTTP clients. In addition, CORS (Cross-origin resource sharing) is supported to provide secure work with the API of the client application.
 
 The XSOLLA API works with the following base URLs:
+
 * `https://api.xsolla.com` — Pay Station API, Store API, Publisher Account API;
 * `https://login.xsolla.com/api` — Login API.
 
@@ -22,20 +23,20 @@ The XSOLLA API works with the following base URLs:
 > ~~~
 
 ## Requests and responses
-Requests to XSOLLA APi:
+Requests to XSOLLA API:
 * Sent via the HTTP Protocol.
 * Use [TLS](https://habr.com/ru/post/258285/) version 1.2 and above.
 * Must contain the authentication parameters (see section [Authentication](#Authentication)).
 * For requests of type *PUT* and *POST* must contain additional header `Content-Type: application/json`.
 
 Example:
-``
+```
 Authorization: Basic <your_authorization_basic_key>
 Content-Type: application/json
-``
+```
 > ***Warning!*** 
 > ~~~
-> By default, all requests return a response as a JSON with the header `Content-Type: application/json`.
+> By default, all requests return a response as a JSON with `Content-Type: application/json` header.
 > ~~~
 
 ## Changes in the XSOLLA API
@@ -79,7 +80,7 @@ Changed the URL command: `https://api.xsolla.com/merchant/v2/merchants/{merchant
 Changed the format of the response:
 * Negative values for fields are filled in for cancelled transactions:
 
-   **Payment system fee, fixed**; **Xsolla revenue share, fixed**; **Sales Tax**; **Virtual currency purchase amount**; **Simple checkout purchase amount**; *** Items purchase amount**; *** Replacement costs, total**;** *Fees covered, fixed****; ** Fees covered by Balance by**; *** payout amount from payment system**;**payment amount from balance**; * * pin codes purchase amount**.
+   **Payment system fee, fixed**; **Xsolla revenue share, fixed**; **Sales Tax**; **Virtual currency purchase amount**; **Simple checkout purchase amount**; **Items purchase amount**; **Repatriation costs, total**; **Fees covered, fixed**; **Fees covered by Balance**; **Payout amount from payment system**; **Payment amount from Balance**; **Pin codes purchase amount**.
 
 * Added new fields:
 
@@ -237,7 +238,7 @@ xhr.send(data);
 All XSOLLA API commands point to the type of data to be processed and the action to be taken with that data. Standard action list:
 * Creation: `POST` - creates and stores an entity of the corresponding type.
 * List: `GET` - returns a list of entities that meet the request.
-* Reception: `GET` - returns data on a specific identifier that you send in the request.
+* Obtaining: `GET` - returns data on a specific identifier that you send in the request.
 * Replacement: `PUT` - replaces all fields for the entity passed in the request.
 * Change: `PATCH` - changes only the specified fields of an existing object that matches the ID from the query
 * Removal: `DELETE` - deletes an existing object that corresponds to the identifier from the query.
@@ -252,7 +253,7 @@ The result of the query should be displayed page by page. This means that only p
 XSOLLA uses standard HTTP codes to indicate successful or unsuccessful requests. In General, the code in the 2xx range indicates success, the code in the 4xx range indicates an error as a result of incorrect parameters (for example, a mandatory parameter is not passed, or authorization has not passed, etc.), the code in the 5xx range means a server error.
 
 List of supported HTTP responses:
-* 200, 201, 204 — successful answer.
+* 200, 201, 204 — successful response.
 * 400 Bad Request — missing required parameter, full description can be found in the response body.
 * 401 Unauthorized — invalid API key.
 * 402 Request Failed — the parameters are correct, but the request failed.
@@ -297,47 +298,47 @@ Field | Type | Description
 ---- | --- | --------
 user |object|Object with user information.
 user.id|object|Mandatory object with data about the user ID.
-user.id.value|string|user ID.
-user.name|object|an Object with information about the user's nick.
-user.name.value|string|the Nickname of the user.
+user.id.value|string|User ID.
+user.name|object|An Object with information about the user's nick.
+user.name.value|string|The Nickname of the user.
 user.email|object|Object with information about the user's email.
 user.email.value|string|Email of the user. Must be valid under RFC 822.
 user.phone|object|Object with information about the user's phone.
-user.phone.value|string|user's phone Number.
+user.phone.value|string|User's phone Number.
 user.country|object|Object with information about the user's country.
-user.country.value|string|two-Letter country designation according to ISO 3166-1 alpha-2.
+user.country.value|string|Two-Letter country designation according to [ISO 3166-1 alpha-2](https://wikipedia.org/wiki/ISO_3166-1_alpha-2).
 user.country.allow_modify|boolean|Allow to change country on payment page. Default is 'false'.
 user.attributes|object|Object with user attribute data needed to filter the list of items. Parameters are passed to the JSON hash in key-value pairs.
 user.steam_id|object|Object with steam user ID data.
-user.steam_id.value|string|the Steam ID of the user.
+user.steam_id.value|string|The Steam ID of the user.
 user.tracking_id|object|Object with the Tracking ID data of the user.
 user.tracking_id.value|string|Unique Tracking ID (used for advertising campaigns).
 user.public_id.value|string|Parameter that uniquely identifies the user. Unlike user ID, it is known to the user (email address, nickname, etc.). The parameter can be used when paying for a purchase outside the game store (for example, the game button in the payment terminals).
 user.utm|object|Object with data about the characteristics of the traffic.
-user.utm.utm_source|string|traffic Source.
-user.utm.utm_medium|string|traffic Channel (contextual advertising, display advertising, email-mailing).
-user.utm.utm_campaign|string|campaign Name (transliterated or translated into English).
-user.utm.utm_term|string|campaign Keyword. When using this option, the statistics data will be collected on those keywords, which are used for targeting advertising campaigns (no search queries). In Google Analytics, the content of the utm_term label falls into a single report with search queries.
-user.utm.utm_content|string|the Contents of the campaign.
-user.is_legal|boolean|whether the user is a legal entity.
+user.utm.utm_source|string|Traffic Source.
+user.utm.utm_medium|string|Traffic Channel (contextual advertising, display advertising, email-mailing).
+user.utm.utm_campaign|string|Campaign Name (transliterated or translated into English).
+user.utm.utm_term|string|Campaign Keyword. When using this option, the statistics data will be collected on those keywords, which are used for targeting advertising campaigns (no search queries). In Google Analytics, the content of the utm_term label falls into a single report with search queries.
+user.utm.utm_content|string|The Contents of the campaign.
+user.is_legal|boolean|Whether the user is a legal entity.
 user.legal|object|Object with the details of the legal entity. The object and all its parameters are required if the value ‘true’is passed to user.is_legal.
-user.legal.name|string|the Full legal name.
+user.legal.name|string|The Full legal name.
 user.legal.address|string|Full legal address.
 user.legal.vat_id|string|Individual taxpayer ID.
-user.legal.country|string|two-Letter country designation according to ISO 3166-1 alpha-2.
+user.legal.country|string|Two-Letter country designation according to [ISO 3166-1 alpha-2](https://wikipedia.org/wiki/ISO_3166-1_alpha-2).
 settings|object|Object containing project settings.
 settings.external_id|string|External transaction ID.
-settings.project_id|integer|ID of THE xsolla game. Is in Your account. Obligatory.
-settings.language|string|language of the interface. Two-letter designation (lowercase) according to ISO 639-1 is used.
+settings.project_id|integer|ID of the Xsolla game. Is present in Your account. Mandatory.
+settings.language|string|Preferred interface language. Two-letter designation (lowercase) according to ISO 639-1 is used.
 settings.return_url|string|URL of the page to which the user will be redirected after making a payment. The parameters 'user_id', 'foreigninvoice', 'invoice_id' and 'status' will be automatically added to the link.
 settings.currency|string|Preferred payment currency. The three-letter currency designation according to ISO 4217 is used.
-settings.mode|string|the Attribute to test payments that you want to pass a value of 'sandbox'. When you make a test payment, the URL for the payment page will be https://sandbox-secure.xsolla.com ahhh!
+settings.mode|string|the Attribute to test payments that you want to pass a value of 'sandbox'. When you make a test payment, the URL for the payment page will be <https://sandbox-secure.xsolla.com>.
 settings.payment_method|integer|ID of the payment method.
-settings.payment_widget|string|payment Widget. Takes the values 'paybycash' or 'giftcard'. When you pass this parameter, the user is redirected to the Pay with Cash or Gift Cards widget, respectively.
+settings.payment_widget|string|Payment Widget. Takes the values 'paybycash' or 'giftcard'. When you pass this parameter, the user is redirected to the Pay with Cash or Gift Cards widget, respectively.
 settings.ui|object|Object with interface settings.
-settings.ui.theme|string|the appearance of the interface charge. Can take values 'default' (default) or 'default_dark'.
+settings.ui.theme|string|The appearance of the interface charge. Can take values 'default' (default) or 'default_dark'.
 settings.ui.size|string|Size of the payment interface. Depending on the required size of the payment interface, the parameter can take the following values: <ul><li>'small': The smallest size of the payment interface. Used in cases where the window size is strictly limited (size: 620 x 630).</li><li>'medium': recommended size of the payment interface is optimal when opened in lightbox (size: 740 x 760).</li><li>'large': it is desirable to open in a new window/tab (size: 820 x 840).</li></ul>
-settings.ui.version|string|the type of the device. It can be either 'desktop' (default) or 'mobile'.
+settings.ui.version|string|The type of the device. It can be either 'desktop' (default) or 'mobile'.
 settings.ui.desktop|object|Object with settings data for the desktop version.
 settings.ui.desktop.header|object|Object with header settings.
 settings.ui.desktop.header.is_visible|boolean|Visibility of header. Indicates whether the header should be displayed on the payment page.
@@ -350,24 +351,24 @@ settings.ui.desktop.subscription_list|object|an Object containing data to config
 settings.ui.desktop.subscription_list.layout|string|list Template. Takes the values 'list' (default) or 'grid'.
 settings.ui.desktop.subscription_list.description|string|Description of the subscription list that appears before the list of recurrent plans in the payment interface.
 settings.ui.desktop.subscription_list.display_local_price|boolean|If true and if the user's local currency is different from the plan's base currency, the user will see two prices: the price in local currency and the price in the base currency of the plan.
-settings.ui.desktop.virtual_item_list|object|an Object containing data to configure a list of items.
+settings.ui.desktop.virtual_item_list|object|An Object containing data to configure a list of items.
 settings.ui.desktop.virtual_item_list.layout|string|list Template. Takes the values 'list' (default) or 'grid'.
 settings.ui.desktop.virtual_item_list.button_with_price|boolean|If true, the price of the item will be shown inside the button. If 'false', the price will be to the left of the button. Default is 'false'.
 settings.ui.desktop.virtual_item_list.view|string|Displays a list of virtual item groups either as a vertical menu or as a horizontal menu above the window. Takes the values 'horizontal_navigation' or 'vertical' (default).
-settings.ui.desktop.virtual_currency_list|object|an Object containing data to configure a list of packages of virtual currency.
+settings.ui.desktop.virtual_currency_list|object|An Object containing data to configure a list of packages of virtual currency.
 settings.ui.desktop.virtual_currency_list.description|string|Here you can send the text about the virtual currency. The text appears before the list of virtual currency packages in the payment interface.
 settings.ui.desktop.virtual_currency_list.button_with_price|boolean|If true, the price of the item will be shown inside the button. If 'false', the price will be to the left of the button. Default is 'false'.
 settings.ui.header.visible_virtual_currency_balance|boolean|Visibility of the header element in the payment interface. Default is 'true'.
-settings.ui.mobile.mode|string|the User can only make a payment using stored payment methods. Takes the value 'saved_accounts'.
+settings.ui.mobile.mode|string|The User can only make a payment using stored payment methods. Takes the value 'saved_accounts'.
 settings.ui.mobile.header.close_button|boolean|Visibility of the "Close" button in the mobile version of the payment interface. Clicking on the button closes the payment interface and redirects the user to the address specified in the "settings" parameter.return_url". Default is 'false'.
-settings.ui.mobile.footer.is_visible|boolean|footer Visibility in the mobile version of the payment interface.
+settings.ui.mobile.footer.is_visible|boolean|Footer Visibility in the mobile version of the payment interface.
 settings.ui.license_url|string|Link to license agreement.
 settings.ui.components|object|Object with menu item settings data.
 settings.ui.components.virtual_items|object|Object with item menu setting data.
 settings.ui.components.virtual_items.order|integer|Place tabs in the menu.
 settings.ui.components.virtual_items.hidden|boolean|Visibility of the tab in the menu.
-settings.ui.components.virtual_items.selected_group|string|the Group that will be selected when the tab is opened.
-settings.ui.components.virtual_items.selected_item|string|the Item to be selected when the tab is opened. The item number must be transferred.
+settings.ui.components.virtual_items.selected_group|string|The Group that will be selected when the tab is opened.
+settings.ui.components.virtual_items.selected_item|string|The Item to be selected when the tab is opened. The item number must be transferred.
 settings.ui.components.virtual_currency|object|Object with the data settings menu for the virtual currency.
 settings.ui.components.virtual_currency.custom_amount|boolean|Ability to enter an arbitrary amount of virtual currency in the payment interface.
 settings.ui.components.virtual_currency.order|integer|Place tabs in the menu.
@@ -377,22 +378,22 @@ settings.ui.components.subscriptions.order|integer|Place tabs in the menu.
 settings.ui.components.subscriptions.hidden|boolean|Visibility of the tab in the menu.
 settings.ui.mode|string|Payment interface in the personal account mode. Takes the value 'user_account'. Header contains only the navigation menu of the Personal account; excludes the possibility of selecting an item and paying for the purchase; personal account mode is available only in desktop-mode.
 settings.ui.user_account|object|Object with user account data.
-settings.ui.user_account.info/object/Страница 'My account'.
+settings.ui.user_account.info|object|'My Account' page.
 settings.ui.user_account.info.order|integer|Place tabs in the menu.
 settings.ui.user_account.info.enable|boolean|Visibility tab in the menu. Default is 'false'.
-settings.ui.user_account.history|object|user's History Page.
+settings.ui.user_account.history|object|User's History Page.
 settings.ui.user_account.history.order|integer|Place tabs in the menu.
 settings.ui.user_account.history.enable|boolean|Visibility of the tab in the menu. Default is 'false'.
-settings.ui.user_account.payment_accounts|object|'My payment accounts'Page.
+settings.ui.user_account.payment_accounts|object|'My payment accounts' page.
 settings.ui.user_account.payment_accounts.order|integer|Place tabs in the menu.
 settings.ui.user_account.payment_accounts.enable|boolean|Visibility of the tab in the menu. Default is 'false'.
-settings.ui.user_account.subscriptions|object|subscription Management Page.
+settings.ui.user_account.subscriptions|object|Subscription Management Page.
 settings.ui.user_account.subscriptions.order|integer|Place tabs in the menu.
 settings.ui.user_account.subscriptions.enable|boolean|Visibility of the tab in the menu. Default is 'false'.
-settings.shipping_enabled|boolean|display the page enter the address of the saver. Default is 'false'.
+settings.shipping_enabled|boolean|Display the page enter the address of the saver. Default is 'false'.
 purchase|object|Object with order information.
 purchase.virtual_currency|object|Object with virtual currency data.
-purchase.virtual_currency.quantity|float|the Amount of virtual currency in the order.
+purchase.virtual_currency.quantity|float|The Amount of virtual currency in the order.
 purchase.virtual_currency.currency|string|Currency of the virtual currency package, on the basis of which all calculations will be made.
 purchase.virtual_items|object|Object with object data.
 purchase.virtual_items.currency|string|Currency of the item in the order, on the basis of which all calculations will be made.
@@ -402,7 +403,7 @@ purchase.virtual_items.items.amount|integer|Number of copies of the item in the 
 purchase.virtual_items.available_groups|array|Array with data about groups of subjects. Only items from the specified groups will be shown in the payment interface.
 purchase.subscription|object|Object with subscription data.
 purchase.subscription.plan_id|string|ID of the recurrent plan.
-purchase.subscription.operation|string|the Type of operation to apply to the user's subscription plan. To change the subscription plan, you must pass the ‘change_plan’value in this parameter. In the purchase parameter.subscription.plan_id you must pass the ID of the new subscription plan.
+purchase.subscription.operation|string|The Type of operation to apply to the user's subscription plan. To change the subscription plan, you must pass the ‘change_plan’value in this parameter. In the purchase parameter.subscription.plan_id you must pass the ID of the new subscription plan.
 purchase.subscription.product_id|string|ID of the recurrent product.
 purchase.subscription.currency|string|Currency of the recurrent plan in the order, on the basis of which all calculations will be made.
 purchase.subscription.available_plans|array|Array with data about subscription plans. Only plans from this list will be shown in the payment interface.
@@ -417,19 +418,19 @@ purchase.pin_codes.upgrade.id_user_history|integer|ID of the record containing d
 purchase.pin_codes.upgrade.id|integer|ID of an upgrade.
 purchase.checkout|object|Object with order information.
 purchase.checkout.currency|string|order Currency. The three-letter currency designation according to ISO 4217 is used.
-purchase.checkout.amount|float|order Amount.
+purchase.checkout.amount|float|Order Amount.
 purchase.description|object|Object with a description of the object.
-purchase.description.value|string|the description of the item. It will be displayed in the payment interface and email receipt.
+purchase.description.value|string|The description of the item. It will be displayed in the payment interface and email receipt.
 purchase.gift|object|Object with information about the gift.
 purchase.gift.giver_id|string|ID of the donor.
 purchase.gift.message|string|Message from the giver.
-purchase.gift.hide_giver_from_receiver|string|data Visibility of the gift giver to the gift recipient. Default is 'true'.
+purchase.gift.hide_giver_from_receiver|string|Data Visibility of the gift giver to the gift recipient. Default is 'true'.
 purchase.gift.friends|array|Array with data about friends.
 purchase.gift.friends.id|string|ID the gift recipient.
-purchase.gift.friends.name|string|the Nickname of the gift recipient.
+purchase.gift.friends.name|string|The Nickname of the gift recipient.
 purchase.gift.friends.email|string|Email of the gift recipient.
 purchase.coupon_code|object|Object with information about the promotional code for a discount or bonuses when buying.
-purchase.coupon_code.value|string|the value of the promotional code.
+purchase.coupon_code.value|string|The value of the promotional code.
 purchase.coupon_code.hidden|boolean|Visibility of the field for entering the promo code in the payment interface. Default is 'false'.
 custom_parameters|object|Additional parameters sent in the JSON hash of pairs key-value.
 
@@ -509,7 +510,7 @@ Body:
     }
   }
 }
-ANSWER
+RESPONSE
 {
   "token": "eop57k1boA7nnYPtewZ6KEXJyJADEwRT"
 }
@@ -523,7 +524,7 @@ curl --request POST \
   --header 'authorization: Basic <your_authorization_basic_key>' \
   --header 'content-type: application/json' \
   --data '{'user':{'id':{'value':'user_2'},'name':{'value':'John Smith"},"email":{"value":"john.smith@mail.com"},"country":{"value":"US","allow_modify":true}},"settings":{"project_id":16184,"currency":"USD","language":"en","ui":{"size":"medium","desktop":{"virtual_item_list":{"layout":"list","button_with_price":true}},"components":{"virtual_currency":{"custom_amount":true}}}},"purchase":{"virtual_currency":{"quantity":100},"virtual_items":{"items":[{"sku":"SKU01","amount":1}]}}}'
-ANSWER
+RESPONSE
 {
   "token": "eop57k1boA7nnYPtewZ6KEXJyJADEwRT"
 }
@@ -552,7 +553,7 @@ $client->enqueue($request)->send();
 $response = $client->getResponse();
 
 echo $response->getBody();
-ANSWER
+RESPONSE
 {
   "token": "eop57k1boA7nnYPtewZ6KEXJyJADEwRT"
 }
@@ -567,7 +568,7 @@ request.AddHeader("authorization", "Basic <your_authorization_basic_key>)");
 request.AddHeader("content-type", "application/json");
 request.AddParameter("application/json", "{\"user\":{\"id\":{\"value\":\"user_2\"},\"name\":{\"value\":\"John Smith\"},\"email\":{\"value\":\"john.smith@mail.com\"},\"country\":{\"value\":\"US\",\"allow_modify\":true}},\"settings\":{\"project_id\":16184,\"currency\":\"USD\",\"language\":\"en\",\"ui\":{\"size\":\"medium\",\"desktop\":{\"virtual_item_list\":{\"layout\":\"list\",\"button_with_price\":true}},\"components\":{\"virtual_currency\":{\"custom_amount\":true}}}},\"purchase\":{\"virtual_currency\":{\"quantity\":100},\"virtual_items\":{\"items\":[{\"sku\":\"SKU01\",\"amount\":1}]}}}", ParameterType.RequestBody);
 IRestResponse response = client.Execute(request);
-ANSWER
+RESPONSE
 {
   "token": "eop57k1boA7nnYPtewZ6KEXJyJADEwRT"
 }
@@ -593,7 +594,7 @@ res = conn.getresponse()
 data = res.read()
 
 print(data.decode("utf-8"))
-ANSWER
+RESPONSE
 {
   "token": "eop57k1boA7nnYPtewZ6KEXJyJADEwRT"
 }
@@ -618,7 +619,7 @@ request.body = "{\"user\":{\"id\":{\"value\":\"user_2\"},\"name\":{\"value\":\"J
 
 response = http.request(request)
 puts response.read_body
-ANSWER
+RESPONSE
 {
   "token": "eop57k1boA7nnYPtewZ6KEXJyJADEwRT"
 }
@@ -639,7 +640,7 @@ Request request = new Request.Builder()
   .build();
 
 Response = client.newCall(request).execute();
-ANSWER
+RESPONSE
 {
   "token": "eop57k1boA7nnYPtewZ6KEXJyJADEwRT"
 }
@@ -712,7 +713,7 @@ xhr.setRequestHeader("content-type", "application/json");
 xhr.setRequestHeader("authorization", "Basic <your_authorization_basic_key>)");
 
 xhr.send(data);
-ANSWER
+RESPONSE
 {
   "token": "eop57k1boA7nnYPtewZ6KEXJyJADEwRT"
 }
@@ -720,26 +721,26 @@ ANSWER
 
 ### List of additional parameters
 
-You can pass additional parameters to the token in the custom_parameters object that can be used to configure anti-fraud filters. Recommended parameters are given in the table below, if necessary, this list can be expanded. ([more] https://developers.xsolla.com/ru/recipes/general/antifraud/)).
+You can pass additional parameters to the token in the custom_parameters object that can be used to configure anti-fraud filters. Recommended parameters are given in the table below, if necessary, this list can be expanded. [more](https://developers.xsolla.com/ru/recipes/general/antifraud/).
 
 Field | Type | Description
 ---- | --- | --------
-registration_date|string|account registration date according to [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601).
+registration_date|string|Account registration date according to [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601).
 total_hours|integer|Total number of hours spent in the game.
 total_characters|integer|Number of player characters.
 social_networks_added|boolean|Presence of player profiles in social networks.
 profile_image_added|boolean|Presence profile image.
-active_date|string|date of last visit according to [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601).
+active_date|string|Date of last visit according to [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601).
 total_friends|integer|Number of player's friends.
 additional_verification|boolean|Additional ways to protect your account.
-win_rate|integer|the Rating of victories of the player.
-last_change_password_date|string|date of last password change according to [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601).
+win_rate|integer|Rating players of victories.
+last_change_password_date|string|Date of last password change according to [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601).
 chat_activity|boolean|Presence of chat entries.
 forum_activity|boolean|Presence of entries in the forum.
 total_bans|integer|Number of player bans in chat/forum.
-profile_completed|boolean|the Availability of additional information in the profile.
+profile_completed|boolean|Availability of additional information in the profile.
 notifications_enabled|boolean|Availability subscribe to notifications.
-user_level|integer|player Level, reputation or rank.
+user_level|integer|Player Level, reputation or rank.
 karma_points|integer|Karma player.
 total_sum|float|Total amount of payments.
 non_premium_currency|float|Sum of the secondary currency of the player.
@@ -748,11 +749,11 @@ total_gifts|integer|Number of gifts sent or received by the player.
 tutorial_completed|boolean|Indicator of completion of training in the game.
 completed_tasks|integer|Number of completed tasks.
 items_used|boolean|Indicator use purchased in-game items.
-pvp_activity|boolean|player participation Rate in PvP.
+pvp_activity|boolean|Player participation Rate in PvP.
 total_clans|integer|Number of clans the player is a member of.
 unlocked_achievements|integer|Number of unlocked skills.
-total_inventory_value|float|total inventory value in-game currency.
-character_customized|boolean|character customization Score.
+total_inventory_value|float|Total inventory value in-game currency.
+character_customized|boolean|Character customization Score.
 session_time|string|Period of time the user spends in the game according to [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601).
 
 ## Notifications
@@ -847,11 +848,11 @@ Field | Type | Description
 ---- | --- | --------
 user|object|Object with user information.
 user.ip|string|IP address of the user.
-user.phone|string|user's phone Number (in international format).
+user.phone|string|User's phone Number (in international format).
 user.email|string|Email of the user.
-user.id/string/ID user. Obligatory.
-user.name/string/Имя user.
-user.country|string|two-Letter country designation according to ISO 3166-1 alpha-2.
+user.id|string|User ID. Mandatory.
+user.name|string|User name.
+user.country|string|Two-Letter country designation according to [ISO 3166-1 alpha-2](https://wikipedia.org/wiki/ISO_3166-1_alpha-2).
 
 Examples of verification:
 
@@ -876,7 +877,7 @@ Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
         "country": "US"
     }
 }
-ANSWER
+RESPONSE
 HTTP/1.1 204 No Content
 ```
 
@@ -899,7 +900,7 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
         "country": "US"
     }
 }'
-ANSWER
+RESPONSE
 ```
 
 ***PHP***
@@ -917,7 +918,7 @@ $request = array(
         'country' => 'US'
     )
 );
-ANSWER
+RESPONSE
 <?php
 
 use Xsolla\SDK\Webhook\WebhookServer;
@@ -942,10 +943,10 @@ Public User ID — a parameter that can uniquely identify the user and which is 
 
 Field | Type | Description
 ---- | --- | --------
-notification_type|string|alert Type. Obligatory.
-user|object|Object with user information. Obligatory.
+notification_type|string|Alert Type. Mandatory.
+user|object|Object with user information. Mandatory.
 user.public_id|string|Public user ID.
-user.id|string|ID user.
+user.id|string|User ID.
 
 User search examples: 
 
@@ -965,7 +966,7 @@ Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
         "public_id": "public_email@example.com"
     }
 }
-ANSWER
+RESPONSE
 HTTP/1.1 200 OK
 Content-Type: application/json
 
@@ -994,7 +995,7 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
         "public_id": "public_email@example.com"
     }
 }'
-ANSWER
+RESPONSE
 {
     "user": {
         "public_id": "public_email@example.com",
@@ -1017,7 +1018,7 @@ $request = array(
         'public_id' => 'public_email@example.com'
     )
 );
-ANSWER
+RESPONSE
 <?php
 
 use Xsolla\SDK\Webhook\WebhookServer;
@@ -1047,45 +1048,45 @@ When the user successfully makes the payment, XSOLLA sends the payment details t
 
 Field | Type | Description
 ---- | --- | --------
-notification_type|string|alert Type. Obligatory.
+notification_type|string|Alert Type. Mandatory.
 purchase|object|Object with order information.
 purchase.virtual_currency|object|Object with data about the purchased virtual currency.
-purchase.virtual_currency.name|string|the Name of the virtual currency.
-purchase.virtual_currency.sku|string|article of a package of virtual currency (if specified for a package of virtual currency).
-purchase.virtual_currency.quantity|float|bonus item Quantity.
-purchase.virtual_currency.currency|string|three-Letter designation of the virtual currency of the order according to ISO 4217.
+purchase.virtual_currency.name|string|The Name of the virtual currency.
+purchase.virtual_currency.sku|string|Article of a package of virtual currency (if specified for a package of virtual currency).
+purchase.virtual_currency.quantity|float|Bonus item Quantity.
+purchase.virtual_currency.currency|string|Three-Letter designation of the virtual currency of the order according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217).
 purchase.virtual_currency.amount|float|purchase Amount.
 purchase.checkout|object|Object with order information.
-purchase.checkout.currency|string|three-letter currency symbol according to ISO 4217 standard.
+purchase.checkout.currency|string|three-letter currency symbol according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217) standard.
 purchase.checkout.amount|float|order Amount.
 purchase.subscription|object|Object with subscription data.
 purchase.subscription.plan_id|string|the ID of the plan (external id if the plan was created through the API).
 purchase.subscription.subscription_id|integer|subscription ID in the XSOLLA database.
 purchase.subscription.product_id|string|product ID (if sent in token).
 purchase.subscription.tags|array|plan Tags.
-purchase.subscription.date_create|string|the date and time the subscription was created according to the ISO 8601 standard.
-purchase.subscription.date_next_charge|string|date and time of the next charge according to ISO 8601.
-purchase.subscription.currency|string|three-Letter currency designation of the recurrent plan according to ISO 4217 standard.
+purchase.subscription.date_create|string|the date and time the subscription was created according to the [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) standard.
+purchase.subscription.date_next_charge|string|date and time of the next charge according to [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601).
+purchase.subscription.currency|string|three-Letter currency designation of the recurrent plan according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217) standard.
 purchase.subscription.amount|float|purchase Amount.
 purchase.virtual_items|object|Object with data about the items in the purchase.
 purchase.virtual_items.items|array|Array with item data.
 purchase.virtual_items.items.sku|string|item ID (article).
 purchase.virtual_items.items.amount|integer|the Quantity of this item in the order.
-purchase.virtual_items.currency|string|three-letter currency symbol according to ISO 4217 standard.
+purchase.virtual_items.currency|string|three-letter currency symbol according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217) standard.
 purchase.virtual_items.amount|integer|order Amount.
 purchase.pin_codes|object|Array with key data.
 purchase.pin_codes.digital_content|string|article of the game, configured in Your account.
 purchase.pin_codes.drm|string|DRM is the platform on which the game will be available. Can take values 'steam', 'playstation', 'xbox', 'uplay', 'origin', 'drmfree', 'gog', 'epicgames', 'nintendo_eshop', 'discord_game_store' or 'oculus'. Before using, you need to make sure that the required DRM platform is configured in Your personal account.
-purchase.pin_codes.currency|string|three-Letter designation of the purchase currency according to ISO 4217.
+purchase.pin_codes.currency|string|three-Letter designation of the purchase currency according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217).
 purchase.pin_codes.amount|float|key Value.
 purchase.pin_codes.upgrade|object|Object with upgrade information.
 purchase.pin_codes.upgrade.digital_content_from|object|Object with information about the package of the user from which the upgrade was made.
 purchase.pin_codes.upgrade.digital_content_from.digital_content|string|article of the game, configured in Your account.
-purchase.pin_codes.upgrade.digital_content_from.DRM|string|DRM is a platform game.
+purchase.pin_codes.upgrade.digital_content_from.DRM|string|DRM platform of the game.
 purchase.pin_codes.upgrade.digital_content_to|object|Object with information about the package that the user has moved to as part of the upgrade.
 purchase.pin_codes.upgrade.digital_content_to.digital_content|string|article of the game, configured in Your account.
-purchase.pin_codes.upgrade.digital_content_to.DRM|string|DRM is a platform game.
-purchase.pin_codes.upgrade.currency|string|three-Letter designation of the purchase currency according to ISO 4217.
+purchase.pin_codes.upgrade.digital_content_to.DRM|string|DRM platform of the game.
+purchase.pin_codes.upgrade.currency|string|three-Letter designation of the purchase currency according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217).
 purchase.pin_codes.upgrade.amount|float|purchase Amount.
 purchase.gift|object|Object with information about the gift.
 purchase.gift.giver_id|string|ID of the donor.
@@ -1093,8 +1094,8 @@ purchase.gift.receiver_ID|string|ID of the gift recipient.
 purchase.gift.receiver / string|Email of the gift recipient.
 purchase.gift.message|string|Message from the giver.
 purchase.gift.hide_giver_from_receiver|string|Flag showing the visibility of the gift giver to the gift recipient.
-purchase.total|object|Object with data on the total purchase price. Obligatory.
-purchase.total.currency|string|three-letter currency symbol according to ISO 4217 standard.
+purchase.total|object|Object with data on the total purchase price. Mandatory.
+purchase.total.currency|string|three-letter currency symbol according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217) standard.
 purchase.total.amount|float|Total purchase amount.
 purchase.promotions|array|an Array with the data of shares that act on a given purchase.
 purchase.promotions.technical_name|string|Technical name of the promotion.
@@ -1106,45 +1107,45 @@ user|object|Object with user information.
 user.ip|string|IP address of the user.
 user.phone|string|user's phone Number (in international format).
 user.email|string|Email of the user.
-user.id|string|ID user. Obligatory.
+user.id|string|ID user. Mandatory.
 user.name|string|User name.
-user.country|string|two-Letter designation of the user's country according to ISO 3166-1 alpha-2.
+user.country|string|two-Letter designation of the user's country according to [ISO 3166-1 alpha-2](https://wikipedia.org/wiki/ISO_3166-1_alpha-2).
 user.zip|string|zip or Postal code.
-transaction|object|Object with information about the transaction associated with this operation. Obligatory.
+transaction|object|Object with information about the transaction associated with this operation. Mandatory.
 transaction.id|integer|ID of the transaction.
 transaction.external_id|string|External transaction ID.
 transaction.payment_date|string|payment date.
 transaction.payment_method|integer|ID of the payment method in the XSOLLA system.
 transaction.dry_run|integer|Sign of test transaction: 1 — test payment, 0 — real payment.
 transaction.agreement|integer|ID of the agreement.
-payment_details|object|Object with financial payment data. Obligatory.
+payment_details|object|Object with financial payment data. Mandatory.
 payment_details.payment|object|Object with data on the amount paid by the user.
-payment_details.payment.currency|string|three-Letter currency designation according to ISO 4217.
+payment_details.payment.currency|string|three-Letter currency designation according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217).
 payment_details.payment.amount|string|Amount.
 payment_details.payment_method_sum|object|Object with data on the amount that was paid from the payment system.
-payment_details.payment_method_sum.currency|string|three-Letter currency designation according to ISO 4217.
+payment_details.payment_method_sum.currency|string|three-Letter currency designation according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217).
 payment_details.payment_method_sum.amount|string|Amount.
 payment_details.xsolla_balance_sum|object|Object with data on the amount that was paid from the XSOLLA-balance.
-payment_details.xsolla_balance_sum.currency|string|three-Letter currency designation according to ISO 4217.
+payment_details.xsolla_balance_sum.currency|string|three-Letter currency designation according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217).
 payment_details.xsolla_balance_sum.amount|string|Amount.
 payment_details.payout|object|Object with data on the amount of payment.
-payment_details.payout.currency|string|three-Letter currency designation according to ISO 4217.
+payment_details.payout.currency|string|three-Letter currency designation according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217).
 payment_details.payout.amount|float|Amount.
 payment_details.vat|object|VAT Size (EU only).
-payment_details.vat.currency|string|three-Letter currency designation according to ISO 4217.
+payment_details.vat.currency|string|three-Letter currency designation according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217).
 payment_details.vat.amount|float|Amount.
 payment_details.payout_currency_rate|float|currency of payment the currency of payment.
 payment_details.xsolla_fee|object|Size of XSOLLA fee.
-payment_details.xsolla_fee.currency|string|three-Letter currency designation according to ISO 4217.
+payment_details.xsolla_fee.currency|string|three-Letter currency designation according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217).
 payment_details.xsolla_fee.amount|float|Amount.
 payment_details.payment_method_fee|object|Size of the Commission payment system.
-payment_details.payment_method_fee.currency|string|three-Letter currency designation according to ISO 4217.
+payment_details.payment_method_fee.currency|string|three-Letter currency designation according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217).
 payment_details.payment_method_fee.amount|float|Amount.
 payment_details.sales_tax|object|tax Amount (us only).
-payment_details.sales_tax.currency|string|three-Letter currency designation according to ISO 4217.
+payment_details.sales_tax.currency|string|three-Letter currency designation according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217).
 payment_details.sales_tax.amount|float|Amount.
 payment_details.repatriation_commission|object|Object with information on repatriation costs imposed on XSOLLA by third parties.
-payment_details.repatriation_commission.currency|string|three-letter currency symbol of the cost of repatriation in accordance with ISO standard 4217.
+payment_details.repatriation_commission.currency|string|three-letter currency symbol of the cost of repatriation in accordance with [ISO 4217](https://wikipedia.org/wiki/ISO_4217).
 payment_details.repatriation_commission.amount|float|Amount of repatriation costs.
 custom_parameters|object|Advanced options.
 
@@ -1254,7 +1255,7 @@ Authorization: Signature 34553d151e656110c656696c919f9a10e05de542
         "parameter2":"value2"
     }
 }
-ANSWER
+RESPONSE
 HTTP/1.1 204 No Content
 ```
 
@@ -1357,7 +1358,7 @@ $curl -v 'https://your ahhh!hostname/your/uri' \
         "parameter2":"value2"
     }
 }'
-ANSWER
+RESPONSE
 ```
 
 ***PHP***
@@ -1420,7 +1421,7 @@ $request = array(
         )
     )
 );
-ANSWER
+RESPONSE
 <?php
 
 use Xsolla\SDK\Webhook\WebhookServer;
@@ -1450,51 +1451,51 @@ When you cancel a payment, XSOLLA sends the details of the canceled transaction 
 
 Field | Type | Description
 ---- | --- | --------
-notification_type|string|alert Type. Obligatory.
+notification_type|string|Alert Type. Mandatory.
 purchase|object|Object with order information.
 purchase.virtual_currency|object|Object with data about the purchased virtual currency.
-purchase.virtual_currency.name|string|the Name of the virtual currency.
-purchase.virtual_currency.quantity|float|bonus item Quantity.
-purchase.virtual_currency.currency|string|three-letter currency symbol according to ISO 4217 standard.
-purchase.virtual_currency.amount|float|purchase Amount.
+purchase.virtual_currency.name|string|The Name of the virtual currency.
+purchase.virtual_currency.quantity|float|Bonus item Quantity.
+purchase.virtual_currency.currency|string|Three-letter currency symbol according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217) standard.
+purchase.virtual_currency.amount|float|Purchase Amount.
 purchase.checkout|object|Object with order information.
-purchase.checkout.currency|string|three-letter currency symbol according to ISO 4217 standard.
-purchase.checkout.amount|float|order Amount.
+purchase.checkout.currency|string|Three-letter currency symbol according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217) standard.
+purchase.checkout.amount|float|Order Amount.
 purchase.subscription|object|Object with subscription data.
-purchase.subscription.plan_id|string|the ID of the plan (external id if the plan was created through the API).
-purchase.subscription.tags|array|plan Tags.
-purchase.subscription.subscription_id|integer|subscription ID in the XSOLLA database.
-purchase.subscription.date_create|string|the date and time the subscription was created according to the ISO 8601 standard.
-purchase.subscription.currency|string|three-Letter currency designation of the recurrent plan according to ISO 4217 standard.
-purchase.subscription.amount|float|purchase Amount.
+purchase.subscription.plan_id|string|The ID of the plan (external id if the plan was created through the API).
+purchase.subscription.tags|array|Plan Tags.
+purchase.subscription.subscription_id|integer|Subscription ID in the XSOLLA database.
+purchase.subscription.date_create|string|Date and time the subscription was created according to the [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) standard.
+purchase.subscription.currency|string|three-Letter currency designation of the recurrent plan according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217) standard.
+purchase.subscription.amount|float|Purchase Amount.
 purchase.virtual_items|object|Object with data about the items in the purchase.
 purchase.virtual_items.items|array|Array with item data.
 purchase.virtual_items.items.sku|string|item ID (article).
 purchase.virtual_items.items.amount|integer|the Quantity of this item in the order.
-purchase.virtual_items.currency|string|three-letter currency symbol according to ISO 4217 standard.
-purchase.virtual_items.amount|integer|order Amount.
+purchase.virtual_items.currency|string|Three-letter currency symbol according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217) standard.
+purchase.virtual_items.amount|integer|Order Amount.
 purchase.pin_codes|object|Object with key data.
 purchase.pin_codes.upgrade|object|Object with upgrade information.
 purchase.pin_codes.upgrade.digital_content_from|object|Object with information about the package of the user from which the upgrade was made.
-purchase.pin_codes.upgrade.digital_content_from.digital_content|string|article of the game, configured in Your account.
-purchase.pin_codes.upgrade.digital_content_from.DRM|string|DRM is a platform game.
+purchase.pin_codes.upgrade.digital_content_from.digital_content|string|Article of the game, configured in Your account.
+purchase.pin_codes.upgrade.digital_content_from.DRM|string|DRM platform of the game.
 purchase.pin_codes.upgrade.digital_content_to|object|Object with information about the package that the user has moved to as part of the upgrade.
-purchase.pin_codes.upgrade.digital_content_to.digital_content|string|article of the game, configured in Your account.
-purchase.pin_codes.upgrade.digital_content_to.DRM|string|DRM is a platform game.
-purchase.pin_codes.upgrade.currency|string|three-Letter designation of the purchase currency according to ISO 4217.
-purchase.pin_codes.upgrade.amount|float|purchase Amount.
+purchase.pin_codes.upgrade.digital_content_to.digital_content|string|Article of the game, configured in Your account.
+purchase.pin_codes.upgrade.digital_content_to.DRM|string|DRM platform of the game.
+purchase.pin_codes.upgrade.currency|string|Three-Letter designation of the purchase currency according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217).
+purchase.pin_codes.upgrade.amount|float|Purchase Amount.
 purchase.total|object|Object with data on the total purchase price.
-purchase.total.currency|string|three-letter currency symbol according to ISO 4217 standard.
+purchase.total.currency|string|Three-letter currency symbol according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217) standard.
 purchase.total.amount|float|Total purchase amount.
 user|object|Object with user information.
 user.ip|string|IP address of the user.
-user.phone|string|user's phone Number (in international format).
+user.phone|string|User's phone Number (in international format).
 user.email|string|Email of the user.
-user.id|string|User ID. Obligatory.
+user.id|string|User ID. Mandatory.
 user.name|string|User name.
-user.country|string|two-Letter designation of the user's country according to ISO 3166-1 alpha-2.
-user.zip|string|zip or Postal code.
-transaction|object|Object with information about the transaction associated with this operation. Obligatory.
+user.country|string|Two-Letter designation of the user's country according to [ISO 3166-1 alpha-2](https://wikipedia.org/wiki/ISO_3166-1_alpha-2).
+user.zip|string|Zip or Postal code.
+transaction|object|Object with information about the transaction associated with this operation. Mandatory.
 transaction.id|integer|ID of the transaction.
 transaction.external_id|string|External transaction ID.
 transaction.dry_run|integer|Sign of test transaction: 1 — test payment, 0 — real payment.
@@ -1503,34 +1504,34 @@ refund_details|object|Entity with the financial data of refund.
 refund_details.code|integer|ID code.
 refund_details.reason|string|Reason for cancellation.
 refund_details.author|string|Author refanda.
-payment_details|object|Object with financial payment data. Obligatory.
+payment_details|object|Object with financial payment data. Mandatory.
 payment_details.payment|object|Object with data on the amount paid by the user.
-payment_details.payment.currency|string|three-Letter currency designation according to ISO 4217.
+payment_details.payment.currency|string|Three-Letter currency designation according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217).
 payment_details.payment.amount|string|Amount.
 payment_details.payment_method_sum|object|Object with data on the amount that was paid from the payment system.
-payment_details.payment_method_sum.currency|string|three-Letter currency designation according to ISO 4217.
+payment_details.payment_method_sum.currency|string|Three-Letter currency designation according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217).
 payment_details.payment_method_sum.amount|string|Amount.
 payment_details.xsolla_balance_sum|object|Object with data on the amount that was paid from the XSOLLA-balance.
-payment_details.xsolla_balance_sum.currency|string|three-Letter currency designation according to ISO 4217.
+payment_details.xsolla_balance_sum.currency|string|Three-Letter currency designation according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217).
 payment_details.xsolla_balance_sum.amount|string|Amount.
 payment_details.payout|object|Object with data on the amount of payment.
-payment_details.payout.currency|string|three-Letter currency designation according to ISO 4217.
+payment_details.payout.currency|string|Three-Letter currency designation according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217).
 payment_details.payout.amount|float|Amount.
 payment_details.vat|object|VAT Size (EU only).
-payment_details.vat.currency|string|three-Letter currency designation according to ISO 4217.
+payment_details.vat.currency|string|Three-Letter currency designation according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217).
 payment_details.vat.amount|float|Amount.
-payment_details.payout_currency_rate|float|currency of payment the currency of payment.
+payment_details.payout_currency_rate|float|Currency of payment the currency of payment.
 payment_details.xsolla_fee|object|Size of XSOLLA fee.
-payment_details.xsolla_fee.currency|string|three-Letter currency designation according to ISO 4217.
+payment_details.xsolla_fee.currency|string|Three-Letter currency designation according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217).
 payment_details.xsolla_fee.amount|float|Amount.
 payment_details.payment_method_fee|object|Size of the Commission payment system.
-payment_details.payment_method_fee.currency|string|three-Letter currency designation according to ISO 4217.
+payment_details.payment_method_fee.currency|string|Three-Letter currency designation according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217).
 payment_details.payment_method_fee.amount|float|Amount.
 payment_details.sales_tax|object|tax Amount (us only).
-payment_details.sales_tax.currency|string|three-Letter currency designation according to ISO 4217.
+payment_details.sales_tax.currency|string|Three-Letter currency designation according to [ISO 4217](https://wikipedia.org/wiki/ISO_4217).
 payment_details.sales_tax.amount|float|Amount.
 payment_details.repatriation_commission|object|Object with information on repatriation costs imposed on XSOLLA by third parties.
-payment_details.repatriation_commission.currency|string|three-letter currency symbol of the cost of repatriation in accordance with ISO standard 4217.
+payment_details.repatriation_commission.currency|string|Three-letter currency symbol of the cost of repatriation in accordance with [ISO 4217](https://wikipedia.org/wiki/ISO_4217).
 payment_details.repatriation_commission.amount|float|Amount of repatriation costs.
 custom_parameters|object|Advanced options.
 
@@ -1538,7 +1539,7 @@ Cancellation codes:
 
 Code | Reason for cancellation | Description
 --- | -------------- | --------
-1.|Cancellation by the user request / the game request.|Used if the cancellation was made from the Personal account.
+1.|Cancellation by the user/game request.|Used if the cancellation was made from the Personal account.
 2.|Chargeback.|Is used if the transaction was a chargeback.
 3.|Integration Error.|Used in case of problems with integration between XSOLLA and the game. In this case, it is not recommended to blacklist the user.
 4.|Fraud.|Used in case of potential fraud.
@@ -1639,7 +1640,7 @@ Authorization: Signature 31bd5924dd6cbc9cbe99d331c4a086a57291f9d7
         }
     }
 }
-ANSWER
+RESPONSE
 HTTP/1.1 204 No Content
 ```
 
@@ -1725,7 +1726,7 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
         }
     }
 }'
-ANSWER
+RESPONSE
 ```
 
 ***PHP***
@@ -1792,7 +1793,7 @@ $request = array(
         )
     )
 );
-ANSWER
+RESPONSE
 <?php
 
 use Xsolla\SDK\Webhook\WebhookServer;
@@ -1823,26 +1824,26 @@ If the user cancels the payment associated with the upgrade, XSOLLA sends the ca
 
 Field | Type | Description
 ----- | ---- | -----------
-notification_type|string|alert Type. Obligatory.
-purchase|object|Object with purchase information. Obligatory.
+notification_type|string|Alert Type. Mandatory.
+purchase|object|Object with purchase information. Mandatory.
 purchase.pin_codes|object|Object with information about the purchased packages of the game.
-purchase.pin_codes.purchase_type|string|the Type of purchase. It takes the values “regular” – package purchase, “upgrade” – package upgrade.
-purchase.pin_codes.digital_content|string|article of the game, configured in Your account.
-purchase.pin_codes.DRM|string|DRM is a platform game.
-purchase.pin_codes.currency|string|three-Letter designation of the purchase currency according to ISO 4217.
-purchase.pin_codes.amount|float|purchase Amount.
+purchase.pin_codes.purchase_type|string|The Type of purchase. It takes the values “regular” – package purchase, “upgrade” – package upgrade.
+purchase.pin_codes.digital_content|string|Article of the game, configured in Your account.
+purchase.pin_codes.DRM|string|DRM platform of the game.
+purchase.pin_codes.currency|string|Three-Letter designation of the purchase currency according to ISO 4217.
+purchase.pin_codes.amount|float|Purchase Amount.
 purchase.pin_codes.transaction|object|Object with transaction information.
 purchase.pin_codes.transaction.id|integer|ID of the transaction.
 purchase.pin_codes.upgrade|object|Object with upgrade information.
 purchase.pin_codes.upgrade.digital_content_from|object|Object with information about the package of the user from which the upgrade was made.
-purchase.pin_codes.upgrade.digital_content_from.digital_content|string|article of the game, configured in Your account.
-purchase.pin_codes.upgrade.digital_content_from.DRM|string|DRM is a platform game.
+purchase.pin_codes.upgrade.digital_content_from.digital_content|string|Article of the game, configured in Your account.
+purchase.pin_codes.upgrade.digital_content_from.DRM|string|DRM platform of the game.
 purchase.pin_codes.upgrade.digital_content_to|object|Object with information about the package that the user has moved to as part of the upgrade.
-purchase.pin_codes.upgrade.digital_content_to.digital_content|string|article of the game, configured in Your account.
-purchase.pin_codes.upgrade.digital_content_to.DRM|string|DRM is a platform game.
-ownership|object|Object with information about packages owned by the user. Obligatory.
-ownership.digital_content|string|article of the game, configured in Your account.
-ownership.DRM|string|DRM is a platform game.
+purchase.pin_codes.upgrade.digital_content_to.digital_content|string|Article of the game, configured in Your account.
+purchase.pin_codes.upgrade.digital_content_to.DRM|string|DRM platform of the game.
+ownership|object|Object with information about packages owned by the user. Mandatory.
+ownership.digital_content|string|Article of the game, configured in Your account.
+ownership.DRM|string|DRM platform of the game.
 
 Examples of cancellation of an upgrade:
 
@@ -1912,7 +1913,7 @@ Authorization: Signature <signature>
     "DRM": null
   }
 }
-ANSWER
+RESPONSE
 ```
 
 ***CURL***
@@ -1977,7 +1978,7 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
     "DRM": null
   }
 }'
-ANSWER
+RESPONSE
 ```
 
 ***PHP***
@@ -2057,7 +2058,7 @@ $request = array (
     'DRM' => NULL,
   ),
 )
-ANSWER
+RESPONSE
 ```
 
 ### The transaction is declined when checking AFS
@@ -2065,16 +2066,16 @@ If the transaction was rejected during AFS validation, XSOLLA sends the transact
 
 Field | Type | Description
 ---- | --- | --------
-notification_type|string|alert Type. Obligatory.
+notification_type|string|Alert Type. Mandatory.
 user|object|Object with user information.
 user.ip|string|IP address of the user.
-user.phone|string|user's phone Number (in international format).
+user.phone|string|User's phone Number (in international format).
 user.email|string|Email of the user.
-user.id|string|ID user. Obligatory.
+user.id|string|ID user. Mandatory.
 user.name|string|User name.
-user.country|string|two-Letter designation of the user's country according to ISO 3166-1 alpha-2.
-user.zip|string|zip or Postal code.
-transaction|object|Object with information about the transaction associated with this operation. Obligatory.
+user.country|string|Two-Letter designation of the user's country according to [ISO 3166-1 alpha-2](https://wikipedia.org/wiki/ISO_3166-1_alpha-2).
+user.zip|string|Zip or Postal code.
+transaction|object|Object with information about the transaction associated with this operation. Mandatory.
 transaction.id|integer|ID of the transaction.
 transaction.external_id|string|External transaction ID.
 transaction.dry_run|integer|Sign of test transaction: 1 — test payment, 0 — real payment.
@@ -2117,7 +2118,7 @@ Authorization: Signature 31bd5924dd6cbc9cbe99d331c4a086a57291f9d7
         "reason":"Potential fraud"
     }
 }
-ANSWER
+RESPONSE
 HTTP/1.1 204 No Content
 ```
 
@@ -2147,7 +2148,7 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
       "reason":"Potential fraud"
   }
 }'
-ANSWER
+RESPONSE
 ```
 
 ***PHP***
@@ -2175,7 +2176,7 @@ $request = array(
             'reason' => 'Potential fraud'
     )
 );
-ANSWER
+RESPONSE
 <?php
 
 use Xsolla\SDK\Webhook\WebhookServer;
@@ -2205,17 +2206,17 @@ When a user creates a subscription, XSOLLA sends an alert to the webhook URL.
 
 Field | Type | Description
 ---- | --- | --------
-notification_type|string|alert Type. Obligatory.
+notification_type|string|Alert Type. Mandatory.
 user|object|Object with user information.
-user.id|string|ID user. Obligatory.
+user.id|string|ID user. Mandatory.
 user.name|string|User name.
 subscription|object|Object with subscription data.
-subscription.plan_id|string|the ID of the plan (external id if the plan was created through the API).
-subscription.tags|array|plan Tags.
-subscription.subscription_id|integer|subscription ID in the XSOLLA database.
-subscription.product_id|string|product ID (if sent in token).
-subscription.date_create|string|the date and time the subscription was created according to the ISO 8601 standard.
-subscription.date_next_charge|string|date and time of the next charge according to ISO 8601.
+subscription.plan_id|string|The ID of the plan (external id if the plan was created through the API).
+subscription.tags|array|Plan Tags.
+subscription.subscription_id|integer|Subscription ID in the XSOLLA database.
+subscription.product_id|string|Product ID (if sent in token).
+subscription.date_create|string|Date and time the subscription was created according to the [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) standard.
+subscription.date_next_charge|string|Date and time of the next charge according to [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601).
 subscription.trial|object|Object with information about the trial subscription period.
 subscription.trial.value|integer|Duration of the trial period.
 subscription.trial.type|string|trial period Type: day.
@@ -2250,7 +2251,7 @@ Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
             }
     }
 }
-ANSWER
+RESPONSE
 HTTP/1.1 204 No Content
 ```
 
@@ -2280,7 +2281,7 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
                 }
         }
     }'
-ANSWER
+RESPONSE
 ```
 
 ***PHP***
@@ -2306,7 +2307,7 @@ $request = array(
             )
     )
 );
-ANSWER
+RESPONSE
 <?php
 
 use Xsolla\SDK\Webhook\WebhookServer;
@@ -2329,16 +2330,16 @@ In case of change of any parameters ('plan_id', 'date_next_charge') subscription
 
 Field | Type | Description
 ---- | --- | --------
-notification_type|string|alert Type. Obligatory.
+notification_type|string|Alert Type. Mandatory.
 user|object|Object with user information.
-user.id|string|ID user. Obligatory.
+user.id|string|User ID. Mandatory.
 user.name|string|User name.
 subscription|object|Object with subscription data.
-subscription.plan_id|string|the ID of the plan (external id if the plan was created through the API).
-subscription.tags|array|plan Tags.
-subscription.subscription_id|integer|subscription ID in the XSOLLA database.
-subscription.product_id|string|product ID (if sent in token).
-subscription.date_next_charge|string|date and time of the next charge according to ISO 8601.
+subscription.plan_id|string|The ID of the plan (external id if the plan was created through the API).
+subscription.tags|array|Plan Tags.
+subscription.subscription_id|integer|Subscription ID in the XSOLLA database.
+subscription.product_id|string|Product ID (if sent in token).
+subscription.date_next_charge|string|Date and time of the next charge according to [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601).
 
 Examples of changes to the subscription:
 
@@ -2365,7 +2366,7 @@ Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
         "date_next_charge":"2015-01-22T19:25:25+04:00"
     }
 }
-ANSWER
+RESPONSE
 HTTP/1.1 204 No Content
 ```
 
@@ -2390,7 +2391,7 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
             "date_next_charge":"2015-01-22T19:25:25+04:00"
         }
     }'
-ANSWER
+RESPONSE
 ```
 
 ***PHP***
@@ -2411,7 +2412,7 @@ $request = array(
         'date_next_charge' => '2015-01-22T19:25:25+04:00'
     )
 );
-ANSWER
+RESPONSE
 <?php
 
 use Xsolla\SDK\Webhook\WebhookServer;
@@ -2434,17 +2435,17 @@ When a subscription is cancelled for any reason, XSOLLA sends an alert to the we
 
 Field | Type | Description
 ---- | --- | --------
-notification_type|string|alert Type. Obligatory.
+notification_type|string|Alert Type. Mandatory.
 user|object|Object with user information.
-user.id|string|ID user. Obligatory.
+user.id|string|ID user. Mandatory.
 user.name|string|User name.
 subscription|object|Object with subscription data.
-subscription.plan_id|string|the ID of the plan (external id if the plan was created through the API).
-subscription.tags|array|plan Tags.
-subscription.subscription_id|integer|subscription ID in the XSOLLA database.
-subscription.product_id|string|product ID (if sent in token).
-subscription.date_create|string|the date and time the subscription was created according to the ISO 8601 standard.
-subscription.date_end|string|date and time of the expiration of the subscription according to the ISO 8601 standard.
+subscription.plan_id|string|The ID of the plan (external id if the plan was created through the API).
+subscription.tags|array|Plan Tags.
+subscription.subscription_id|integer|Subscription ID in the XSOLLA database.
+subscription.product_id|string|Product ID (if sent in token).
+subscription.date_create|string|Date and time the subscription was created according to the ISO 8601 standard.
+subscription.date_end|string|Date and time of the expiration of the subscription according to the ISO 8601 standard.
 
 Examples of changes to the subscription:
 
@@ -2472,7 +2473,7 @@ Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
         "date_end":"2015-01-22T19:25:25+04:00"
     }
 }
-ANSWER
+RESPONSE
 HTTP/1.1 204 No Content
 ```
 
@@ -2498,7 +2499,7 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
             "date_end":"2015-01-22T19:25:25+04:00"
         }
     }'
-ANSWER
+RESPONSE
 ```
 
 ***PHP***
@@ -2520,7 +2521,7 @@ $request = array(
         'date_end' => '2015-01-22T19:25:25+04:00',
     )
 );
-ANSWER
+RESPONSE
 <?php
 
 use Xsolla\SDK\Webhook\WebhookServer;
@@ -2543,12 +2544,12 @@ XSOLLA sends API calls to the server to retrieve the game key after each success
 
 Field | Type | Description
 ---- | --- | --------
-notification_type|string|alert Type.
+notification_type|string|Alert Type.
 user|object|Object with user information.
-user.id|string|ID user. Obligatory.
+user.id|string|User ID. Mandatory.
 user.name|string|User name.
 pin_code|object|Object with key information.
-pin_code.digital_content|string|article of the game.
+pin_code.digital_content|string|Article of the game.
 pin_code.DRM|string|DRM is the platform on which the game will be available.
 
 Examples of obtaining a key:
@@ -2574,7 +2575,7 @@ Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
         "DRM":"Steam"
     }
 }
-ANSWER
+RESPONSE
 HTTP/1.1 200 OK
 Content-Type: application/json
 {
@@ -2601,7 +2602,7 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
             "DRM":"Steam"
         }
     }'
-ANSWER
+RESPONSE
 ```
 
 ***PHP***
@@ -2622,7 +2623,7 @@ $request = array (
                'DRM' => 'Steam',
            ),
    );
-ANSWER
+RESPONSE
 <?php
 
 use Xsolla\SDK\Webhook\WebhookServer;
@@ -2649,15 +2650,15 @@ When the user activates the key, XSOLLA sends an alert to the webhook URL.
 
 Field | Type | Description
 ---- | --- | --------
-notification_type|string|alert Type.
-key|string|activation Key.
+notification_type|string|Alert Type.
+key|string|Activation Key.
 sku|string|Unique ID of the key package.
 user_id|string|user ID.
-activation_date|datetime|key activation date in YYYYMMDDHHMMSS format according to ISO 8601 standard.
-user_country|string|two-Letter designation of the user's country according to ISO 3166-1 alpha-2.
+activation_date|datetime|Key activation date in YYYYMMDDHHMMSS format according to [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) standard.
+user_country|string|Two-Letter designation of the user's country according to [ISO 3166-1 alpha-2](https://wikipedia.org/wiki/ISO_3166-1_alpha-2).
 restriction|object|Object with regional restriction cluster settings. The cluster includes the type of restriction, the list of countries, servers and language versions for which the game is available.
 < restriction>.sku|string|Unique cluster ID.
-restriction.name|string|the name of the cluster.
+restriction.name|string|Name of the cluster.
 < restriction>.types|array|Array of constraint types.
 restriction_countries|array|Array of countries included in the cluster.
 < restriction>.servers|array|Array of game servers.
@@ -2692,7 +2693,7 @@ Authorization: Signature 52eac2713985e212351610d008e7e14fae46f902
         ]
   }
 }
-ANSWER
+RESPONSE
 HTTP/1.1 204 No Content
 ```
 
@@ -2721,7 +2722,7 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
          ]
     }
 }'
-ANSWER
+RESPONSE
 ```
 
 ***PHP***
@@ -2748,7 +2749,7 @@ $request = array(
                         ),
              ),
 );  
-ANSWER
+RESPONSE
 <?php
 
 $response = null;
@@ -2768,10 +2769,10 @@ Field | Type | Description
 ---- | --- | --------
 string|friends_list|Identifier that determines the type of friend list request.
 user|string|Unique identifier of the user who makes a purchase to a friend.
-query|string|the Name or ID of the other. Can pass part of a friend's name or ID.
-limit|string|Limit the number of elements on the page. Obligatory.
+query|string|The Name or ID of the other. Can pass part of a friend's name or ID.
+limit|string|Limit the number of elements on the page. Mandatory.
 offset|integer|Number of the element, c of which is displayed on the page (numbering is from 0).
-sign|string|the String for the signature is formed as follows:<ul><li>notification_type + parameter values sorted by key in alphabetical order + secret_key</li><li>the Second step is to apply SHA-1 cryptographic hash function to the resulting string in the first step.</li></ul>
+sign|string|The String for the signature is formed as follows:<ul><li>notification_type + parameter values sorted by key in alphabetical order + secret_key</li><li>the Second step is to apply SHA-1 cryptographic hash function to the resulting string in the first step.</li></ul>
 
 Examples of getting a list of friends:
 
@@ -2784,7 +2785,7 @@ Accept: application/json
 Content-Type: application/json
 Content-Length: One thousand two hundred twenty
 Authorization: Signature 31bd5924dd6cbc9cbe99d331c4a086a57291f9d7
-ANSWER
+RESPONSE
 HTTP/1.1 200 OK
 Content-Type: application/json
 
@@ -2826,7 +2827,7 @@ REQUEST
 $ curl -v 'https://your ahhh!webhook.url?notification_type=friends_list&user=user_id&query=frien&offset=10&limit=20&sign=12dfg3f5gdsf4g5s6dfg2sdg1' \
 -X GET \
 -u merchant_id:merchant_api_key
-ANSWER
+RESPONSE
 [
   {
   "friends": [
@@ -2853,20 +2854,20 @@ When a user makes a payment, XSOLLA sends a special notification about the chang
 
 Field | Type | Description
 ---- | --- | --------
-notification_type|string|alert Type.
-operation_type|string|the Type of operation.
+notification_type|string|Alert Type.
+operation_type|string|Operation type.
 id_operation|integer|ID of the operation in the XSOLLA database.
 user|object|Object with user information.
-user.id|string|ID user. Obligatory.
+user.id|string|User ID. Mandatory.
 user.name|string|User name.
 user.email|string|Email of the user.
 virtual_currency_balance|object|Object with user balance data.
-virtual_currency_balance.old_value|string|the Value of balance before the transaction.
-virtual_currency_balance.new_value|string|the value of the balance after the transaction.
-virtual_currency_balance.diff|string|the Amount of virtual currency in the order.
-transaction|object|Object with information about the transaction associated with this operation. Obligatory.
+virtual_currency_balance.old_value|string|Balance before the transaction.
+virtual_currency_balance.new_value|string|Balance after the transaction.
+virtual_currency_balance.diff|string|Amount of virtual currency in the order.
+transaction|object|Object with information about the transaction associated with this operation. Mandatory.
 transaction.id|integer|ID of the transaction.
-transaction.date|string|transaction date.
+transaction.date|string|Transaction date.
 
 Examples: 
 
@@ -2899,7 +2900,7 @@ Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
     "notification_type":"user_balance_operation",
     "id_operation":"66989"
 }
-ANSWER
+RESPONSE
 HTTP/1.1 204 No Content
 ```
 
@@ -2930,7 +2931,7 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
         "notification_type":"user_balance_operation",
         "id_operation":"66989"
     }'
-ANSWER
+RESPONSE
 ```
 
 ***PHP***
@@ -2957,7 +2958,7 @@ $request = array(
     'notification_type' => 'user_balance_operation',
     'id_operation' => '66989'
 );
-ANSWER
+RESPONSE
 <?php
 
 use Xsolla\SDK\Webhook\WebhookServer;
@@ -2980,20 +2981,20 @@ When a user makes a purchase in the game (for example, buying items), XSOLLA sen
 
 Field | Type | Description
 ---- | --- | --------
-notification_type|string|alert Type.
-operation_type|string|the Type of operation.
+notification_type|string|Alert Type.
+operation_type|string|Type of operation.
 id_operation|integer|ID of the operation in the XSOLLA database.
 user|object|Object with user information.
-user.id|string|ID user. Obligatory.
+user.id|string|User ID. Mandatory.
 user.name|string|User name.
 user.email|string|Email of the user.
 virtual_currency_balance|object|Object with user balance data.
-virtual_currency_balance.old_value|string|the Value of balance before the transaction.
-virtual_currency_balance.new_value|string|the value of the balance after the transaction.
-virtual_currency_balance.diff|string|the Amount of virtual currency in the order.
-items_operation_type|string|the Type of operation with objects.
+virtual_currency_balance.old_value|string|Balance before the transaction.
+virtual_currency_balance.new_value|string|Balance after the transaction.
+virtual_currency_balance.diff|string|The Amount of virtual currency in the order.
+items_operation_type|string|Type of operation with objects.
 items|array|Array of data about the item in the order.
-items.sku|string|item ID (article).
+items.sku|string|Item ID (article).
 items.amount|integer|Number of copies of the item in the order.
 
 Examples of in-game purchases:
@@ -3028,7 +3029,7 @@ Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
          }],
     "id_operation":"66989"
 }
-ANSWER
+RESPONSE
 HTTP/1.1 204 No Content
 ```
 
@@ -3060,7 +3061,7 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
              }],
         "id_operation":"66989"
     }'
-ANSWER
+RESPONSE
 ```
 
 ***PHP***
@@ -3088,7 +3089,7 @@ $request = array(
          ),
     'id_operation' => '66989'
 );
-ANSWER
+RESPONSE
 <?php
 
 use Xsolla\SDK\Webhook\WebhookServer;
@@ -3111,24 +3112,24 @@ If the user has activated the coupon to receive items or virtual currency in the
 
 Field | Type | Description
 ---- | --- | --------
-notification_type|string|alert Type.
-operation_type|string|the Type of operation.
+notification_type|string|Alert Type.
+operation_type|string|The Type of operation.
 id_operation|integer|ID of the operation in the XSOLLA database.
 user|object|Object with user information.
-user.id|string|ID user. Obligatory.
+user.id|string|User ID. Mandatory.
 user.name|string|User name.
 user.email|string|Email of the user.
 virtual_currency_balance|object|Object with user balance data.
-virtual_currency_balance.old_value|string|the Value of balance before the transaction.
-virtual_currency_balance.new_value|string|the value of the balance after the transaction.
-virtual_currency_balance.diff|string|the Amount of virtual currency in the order.
-items_operation_type|string|the Type of operation with objects.
+virtual_currency_balance.old_value|string|Balance before the transaction.
+virtual_currency_balance.new_value|string|Balance after the transaction.
+virtual_currency_balance.diff|string|Amount of virtual currency in the order.
+items_operation_type|string|Type of operation with objects.
 items|array|Array of data about the item in the order.
-items.sku|string|item ID (article).
+items.sku|string|Item ID (article).
 items.amount|integer|Number of copies of the item in the order.
 coupon|object|Object with coupon data.
-coupon.coupon_code|string|coupon Code.
-coupon.campaign_code|string|coupon campaign Code.
+coupon.coupon_code|string|Coupon Code.
+coupon.campaign_code|string|Coupon campaign Code.
 
 Examples of coupon activation:
 
@@ -3166,7 +3167,7 @@ Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
          "campaign_code": "Xsolla Campaign"
     }
 }
-ANSWER
+RESPONSE
 HTTP/1.1 204 No Content
 ```
 
@@ -3202,7 +3203,7 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
              "campaign_code": "Xsolla Campaign"
         }
     }'
-ANSWER
+RESPONSE
 ```
 
 ***PHP***
@@ -3234,7 +3235,7 @@ $request = array(
          'campaign_code' => 'Xsolla Campaign'
     )
 );
-ANSWER
+RESPONSE
 <?php
 
 use Xsolla\SDK\Webhook\WebhookServer;
@@ -3257,17 +3258,17 @@ If you want to change the user's balance manually, you can use the "Internal"ope
 
 Field | Type | Description
 ---- | --- | --------
-notification_type|string|alert Type.
-operation_type|string|the Type of operation.
+notification_type|string|Alert Type.
+operation_type|string|Type of operation.
 id_operation|integer|ID of the operation in the XSOLLA database.
 user|object|Object with user information.
-user.id|string|ID user. Obligatory.
+user.id|string|User ID. Mandatory.
 user.name|string|User name.
 user.email|string|Email of the user.
 virtual_currency_balance|object|Object with user balance data.
-virtual_currency_balance.old_value|string|the Value of balance before the transaction.
-virtual_currency_balance.new_value|string|the value of the balance after the transaction.
-virtual_currency_balance.diff|string|the Amount of virtual currency in the order.
+virtual_currency_balance.old_value|string|Balance before the transaction.
+virtual_currency_balance.new_value|string|Balance after the transaction.
+virtual_currency_balance.diff|string|Amount of virtual currency in the order.
 
 Examples of balance changes:
 
@@ -3296,7 +3297,7 @@ Authorization: Signature 13342703ccaca5064ad33ba451d800c5e823db8f
     "notification_type":"user_balance_operation",
     "id_operation":"67002"
 }
-ANSWER
+RESPONSE
 HTTP/1.1 204 No Content
 ```
 
@@ -3323,7 +3324,7 @@ $ curl -v 'https://your ahhh!hostname/your/uri' \
         "notification_type":"user_balance_operation",
         "id_operation":"67002"
     }'
-ANSWER
+RESPONSE
 ```
 
 ***PHP***
@@ -3352,24 +3353,24 @@ When a user cancels a payment, XSOLLA sends a special notification when the user
 
 Field | Type | Description
 ---- | --- | --------
-notification_type|string|alert Type.
-operation_type|string|the Type of operation.
+notification_type|string|Alert Type.
+operation_type|string|Type of operation.
 id_operation|integer|ID of the operation in the XSOLLA database.
 user|object|Object with user information.
-user.id|string|ID user. Obligatory.
+user.id|string|User ID. Mandatory.
 user.name|string|User name.
 user.email|string|Email of the user.
 virtual_currency_balance|object|Object with user balance data.
-virtual_currency_balance.old_value|string|the Value of balance before the transaction.
-virtual_currency_balance.new_value|string|the value of the balance after the transaction.
-virtual_currency_balance.diff|string|the Amount of virtual currency in the order.
-transaction|object|Object with information about the transaction associated with this operation. Obligatory.
+virtual_currency_balance.old_value|string|Balance before the transaction.
+virtual_currency_balance.new_value|string|Balance after the transaction.
+virtual_currency_balance.diff|string|Amount of virtual currency in the order.
+transaction|object|Object with information about the transaction associated with this operation. Mandatory.
 transaction.id|integer|ID of the transaction.
-transaction.date|string|transaction date.
-items_operation_type|string|the Type of operation with objects.
+transaction.date|string|Transaction date.
+items_operation_type|string|Type of operation with objects.
 items|array|Array of data about the item in the order.
-items.sku|string|item ID (article).
-items.amount|integer|the Quantity of this item in the order.
+items.sku|string|Item ID (article).
+items.amount|integer|Quantity of this item in the order.
 
 Examples of payment cancellations:
 
@@ -3476,13 +3477,13 @@ When the secondary market requests data about items from the game inventory, XSO
 
 Field | Type | Description
 ---- | --- | --------
-notification_type|string|alert Type.
+notification_type|string|Alert Type.
 project_id|integer|ID of the project.
 payload|object|Object with information about the user and the secondary market.
 payload.user|object|Object with user information.
-payload.user.id/string/ID user.
+payload.user.id|string|User ID.
 payload.secondary_market|object|Object with information about the secondary market.
-payload.secondary_market.id/string/ID secondary market.
+payload.secondary_market.id|string|Secondary market ID.
 
 Examples of sending a list of items:
 
@@ -3551,16 +3552,16 @@ When the secondary market requests items from the game's inventory, XSOLLA sends
 
 Field | Type | Description
 ---- | --- | --------
-notification_type|string|alert Type.
+notification_type|string|Alert Type.
 project_id|integer|ID of the project.
 payload|object|Object with information about the user and the secondary market.
 payload.user|object|Object with user information.
-payload.user.id|string|ID user.
+payload.user.id|string|User ID.
 items|array|Array with information about items.
-items.sku|string|item number.
+items.sku|string|Item number.
 items.instance_id|string|Unique in-game item ID.
 payload.secondary_market|object|Object with information about the secondary market.
-payload.secondary_market.id/string/ID secondary market.
+payload.secondary_market.id|string|Secondary market ID.
 
 Examples of sending items:
 
@@ -3658,16 +3659,16 @@ When the secondary market sends items to the game inventory, XSOLLA sends an ale
 
 Field | Type | Description
 ---- | --- | --------
-notification_type|string|alert Type.
+notification_type|string|Alert Type.
 project_id|integer|ID of the project.
 payload|object|Object with information about the user and the secondary market.
 payload.user|object|Object with user information.
-payload.user.id/string/ID user.
+payload.user.id|string|User ID.
 items|array|Array with information about items.
-items.sku|string|item number.
+items.sku|string|Item number.
 items.instance_id|string|Unique in-game item ID.
 payload.secondary_market|object|Object with information about the secondary market.
-payload.secondary_market.id/string/ID secondary market.
+payload.secondary_market.id|string|Secondary market ID.
 
 Examples of obtaining items:
 
@@ -3765,8 +3766,8 @@ Error code:
 
 Code | Description
 --- | --------
-INVALID_USER|the Wrong user.
-INVALID_PARAMETER|the parameter is Incorrect.
+INVALID_USER|Wrong user.
+INVALID_PARAMETER|The parameter is Incorrect.
 INVALID_SIGNATURE|Invalid signature.
 INCORRECT_AMOUNT|Incorrect amount.
 INCORRECT_INVOICE|Wrong order.
